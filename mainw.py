@@ -16,7 +16,7 @@ from history_order import Ui_History_Order_Form
 from order_content import Ui_Content_Form
 from application_view import Ui_Application_Form
 
-
+print('hello world')
 
 def get_connection():
     connect = sqlite3.connect('database.db')
