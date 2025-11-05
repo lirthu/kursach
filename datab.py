@@ -4,8 +4,6 @@ connect = sqlite3.connect('database.db')
 c = connect.cursor()
 c.execute("PRAGMA foreign_keys = ON;") # подключает внешние ключи (чтобы  можно было делать связи между таблицами)
 c.row_factory = sqlite3.Row
-# c.execute('''DROP TABLE IF EXISTS employee''')
-# c.execute('''DROP TABLE user''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,18 +80,12 @@ CREATE TABLE IF NOT EXISTS application (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     employee_id INTEGER NOT NULL,
-    status TEXT CHECK(status IN ('Новая', 'В обработке', 'Выполнена', 'Отклонена')) DEFAULT 'Новая' DEFAULT 'Новая',
+    status TEXT CHECK(status IN ('Новая', 'В обработке', 'Выполнена', 'Отклонена')) DEFAULT 'Новая',
     date_open DATE NOT NULL,
     date_close DATE,
     description TEXT,
     FOREIGN KEY (user_id) REFERENCES user (id),
     FOREIGN KEY (employee_id) REFERENCES employee (id))
 ''')
-
-
 connect.commit()
-c.execute("SELECT * FROM employee")
-rows = c.fetchall()
-for row in rows:
-    print(dict(row))
-# c.execute('''DROP TABLE IF EXISTS employee''')
+
