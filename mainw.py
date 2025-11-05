@@ -138,63 +138,8 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.setupUi(self)
         self.user_id = user_id
 
-        self.create_profile_menu()
-        self.create_category_menu()
-
-    def create_profile_menu(self):
-        """Создаем выпадающее меню для кнопки Профиль"""
-        self.profile_menu = QMenu()
-
-        menu_font = self.profile_menu.font()
-        menu_font.setFamily("Segoe Print")  # Ваш шрифт
-        menu_font.setPointSize(10)  # Размер текста
-        self.profile_menu.setFont(menu_font)
-
-        # Добавляем пункты меню
-        open_profile_menu = self.profile_menu.addAction("Личные данные")
-        open_order_menu = self.profile_menu.addAction("Заказы")
-        open_history_menu = self.profile_menu.addAction("История покупок")
-        application = self.profile_menu.addAction("Заявки")
-        self.profile_menu.addSeparator()
-        back_to_log = self.profile_menu.addAction("Выйти")
-
-        open_profile_menu.triggered.connect(self.open_profile_menu)
-        open_order_menu.triggered.connect(self.open_order_menu)
-        back_to_log.triggered.connect(self.open_main_window_return)
-
-        # Привязываем меню к кнопке (предполагается, что у вас есть кнопка с именем pushButton)
-        self.pushButton.setMenu(self.profile_menu)
-
-    def create_category_menu(self):
-        self.category_menu = QMenu()
-        category_font = self.category_menu.font()
-        category_font.setFamily("Segoe Print")
-        category_font.setPointSize(10)
-        self.category_menu.setFont(category_font)
-
-        all_categories = self.category_menu.addAction('Все категории')
-        category_1 = self.category_menu.addAction('категория 1')
-        category_2 = self.category_menu.addAction('категория 2')
-        category_3 = self.category_menu.addAction('категория 3')
-        category_4 = self.category_menu.addAction('категория 4')
-        # all_categories.triggered.connect(self.open_category_menu)
-
-        self.pushButton_4.setMenu(self.category_menu)
-
-    def open_profile_menu(self):
-        self.close()
-        self.win = ProfileWin(self.user_id, user_type='user')
-        self.win.show()
-
-    def open_order_menu(self):
-        self.close()
-        self.win = OrderWin(self.user_id)
-        self.win.show()
-
-    def open_main_window_return(self):
-        self.close()
-        self.win = MainWindow()
-        self.win.show()
+        menu_manager = ProfileMenuManager(user_id, 'user')
+        self.pushButton.setMenu(menu_manager.create_profile_menu(self))
 
 class ProfileWin(QDialog, Ui_Profile_Form):
     def __init__(self, user_id = None, user_type = 'user'):
@@ -279,10 +224,67 @@ class ProfileWin(QDialog, Ui_Profile_Form):
             self.win = AdminPanel(self.user_id)
         self.win.show()
 
+
+class ProfileMenuManager:
+    def __init__(self, user_id, user_type='user'):
+        self.user_id = user_id
+        self.user_type = user_type
+
+    def create_profile_menu(self, parent_window):
+        """Создаем выпадающее меню для кнопки Профиль"""
+        profile_menu = QMenu()
+
+        menu_font = profile_menu.font()
+        menu_font.setFamily("Segoe Print")
+        menu_font.setPointSize(10)
+        profile_menu.setFont(menu_font)
+
+        # Добавляем пункты меню
+        open_profile_menu = profile_menu.addAction("Личные данные")
+        open_order_menu = profile_menu.addAction("Заказы")
+        open_history_menu = profile_menu.addAction("История покупок")
+        application = profile_menu.addAction("Заявки")
+        profile_menu.addSeparator()
+        back_to_log = profile_menu.addAction("Выйти")
+
+        open_profile_menu.triggered.connect(lambda: self.open_profile_menu(parent_window))
+        open_order_menu.triggered.connect(lambda: self.open_order_menu(parent_window))
+        back_to_log.triggered.connect(lambda: self.open_main_window_return(parent_window))
+        application.triggered.connect(lambda: self.open_application_menu(parent_window))
+        return profile_menu
+
+    def open_profile_menu(self, parent_window):
+        parent_window.close()
+        parent_window.win = ProfileWin(self.user_id, self.user_type)
+        parent_window.win.show()
+
+    def open_order_menu(self, parent_window):
+        parent_window.close()
+        parent_window.win = OrderWin(self.user_id)
+        parent_window.win.show()
+
+    def open_history_menu(self, parent_window):
+        parent_window.close()
+        parent_window.win = HistoryOrder(self.user_id)
+        parent_window.win.show()
+
+    def open_application_menu(self, parent_window):
+        parent_window.close()
+        parent_window.win = Application(self.user_id)
+        parent_window.win.show()
+
+    def open_main_window_return(self, parent_window):
+        parent_window.close()
+        parent_window.win = MainWindow()
+        parent_window.win.show()
+
 class OrderWin(QDialog, Ui_Order_Form):
     def __init__(self, user_id = None):
         super().__init__()
         self.setupUi(self)
+
+        menu_manager = ProfileMenuManager(user_id, 'user')
+        self.pushButton.setMenu(menu_manager.create_profile_menu(self))
 
 class OrderContent(QDialog, Ui_Content_Form):
     def __init__(self, user_id = None):
@@ -294,10 +296,23 @@ class HistoryOrder(QDialog, Ui_History_Order_Form):
         super().__init__()
         self.setupUi(self)
 
+        menu_manager = ProfileMenuManager(user_id, 'user')
+        self.pushButton_8.setMenu(menu_manager.create_profile_menu(self))
+
 class Application(QDialog, Ui_Application_Form):
     def __init__(self, user_id = None):
         super().__init__()
         self.setupUi(self)
+        self.user_id = user_id
+        menu_manager = ProfileMenuManager(user_id, 'user')
+        self.pushButton.setMenu(menu_manager.create_profile_menu(self))
+
+        self.pushButton_6.clicked.connect(self.open_main_window_return)
+
+    def open_main_window_return(self):
+        self.close()
+        self.win = CatalogWin(self.user_id)
+        self.win.show()
 
 class CreateApplication(QDialog, Ui_Create_Application_Form):
     def __init__(self, user_id = None):
