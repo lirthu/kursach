@@ -2,7 +2,7 @@ import sys
 import sqlite3
 
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QTableWidgetItem, QMenu
-
+from PyQt5 import QtWidgets, QtGui
 
 from authorize import Ui_Auth_Form
 from registration import Ui_Reg_Form
@@ -141,7 +141,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         menu_manager = ProfileMenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
 
-class ProfileWin(QDialog, Ui_Profile_Form):
+class UserDataWin(QDialog, Ui_Profile_Form):
     def __init__(self, user_id = None, user_type = 'user'):
         super().__init__()
         self.setupUi(self)
@@ -255,7 +255,7 @@ class ProfileMenuManager:
 
     def open_profile_menu(self, parent_window):
         parent_window.close()
-        parent_window.win = ProfileWin(self.user_id, self.user_type)
+        parent_window.win = UserDataWin(self.user_id, self.user_type)
         parent_window.win.show()
 
     def open_order_menu(self, parent_window):
@@ -278,18 +278,174 @@ class ProfileMenuManager:
         parent_window.win = MainWindow()
         parent_window.win.show()
 
+
 class OrderWin(QDialog, Ui_Order_Form):
-    def __init__(self, user_id = None):
+    def __init__(self, user_id=None):
         super().__init__()
         self.setupUi(self)
-
+        self.user_id = user_id
         menu_manager = ProfileMenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
 
+        self.load_orders()
+
+        self.pushButton_6.clicked.connect(self.open_main_window_return)
+
+    def load_orders(self):
+        """Загрузка заказов пользователя из БД"""
+        conn = get_connection()
+        c = conn.cursor()
+
+        # Получаем заказы пользователя
+        c.execute('''SELECT id, date, status, sum 
+                     FROM user_order 
+                     WHERE user_id = ? 
+                     ORDER BY date DESC''', (self.user_id,))
+        orders = c.fetchall()
+        conn.close()
+
+        self.tableWidget.setRowCount(len(orders))
+        self.tableWidget.setColumnCount(5)
+
+        # Устанавливаем заголовки
+        headers = ['Номер', 'Дата', 'Содержимое', 'Статус', 'Стоимость']
+        self.tableWidget.setHorizontalHeaderLabels(headers)
+
+        for row, order in enumerate(orders):
+            order_id, date, status, total = order
+
+            # Номер заказа
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(str(order_id)))
+            # Дата
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(date))
+
+            # Кнопка для просмотра содержимого
+            details_btn = QtWidgets.QPushButton("Просмотреть")
+            details_btn.clicked.connect(lambda checked, ord_id=order_id: self.show_order_details(ord_id))
+            self.tableWidget.setCellWidget(row, 2, details_btn)
+
+            # Статус
+            status_item = QTableWidgetItem(status)
+            self.tableWidget.setItem(row, 3, status_item)
+
+            # Устанавливаем цвет в зависимости от статуса
+            if status == 'Выполнен':
+                status_item.setBackground(QtGui.QColor(144, 238, 144))  # Светло-зеленый
+            elif status == 'Отменен':
+                status_item.setBackground(QtGui.QColor(255, 182, 193))  # Светло-красный
+            elif status == 'Доставляется':
+                status_item.setBackground(QtGui.QColor(173, 216, 230))  # Светло-голубой
+
+            # Стоимость
+            self.tableWidget.setItem(row, 4, QTableWidgetItem(f"{total:.2f} руб."))
+
+        # Настраиваем внешний вид таблицы
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+    def show_order_details(self, order_id):
+        """Показать содержимое заказа"""
+        self.order_content_win = OrderContent(self.user_id, order_id)
+        self.order_content_win.show()
+
+    def open_main_window_return(self):
+        self.close()
+        self.win = CatalogWin(self.user_id)
+        self.win.show()
+
+
 class OrderContent(QDialog, Ui_Content_Form):
-    def __init__(self, user_id = None):
+    def __init__(self, user_id=None, order_id=None):
         super().__init__()
         self.setupUi(self)
+        self.user_id = user_id
+        self.order_id = order_id
+
+        self.load_order_content()
+
+        # Настраиваем окно
+        self.setWindowTitle(f"Содержимое заказа №{order_id}")
+        self.resize(800, 400)
+
+    def load_order_content(self):
+        """Загрузка содержимого заказа"""
+        conn = get_connection()
+        c = conn.cursor()
+
+        try:
+            # Получаем позиции заказа с информацией о товарах
+            c.execute('''
+                SELECT p.name, p.brand, op.quantity, op.price_at_time, 
+                       (op.quantity * op.price_at_time) as total
+                FROM order_position op
+                JOIN product p ON op.product_id = p.id
+                WHERE op.order_id = ?
+            ''', (self.order_id,))
+
+            order_items = c.fetchall()
+
+            if not order_items:
+                QMessageBox.information(self, "Информация", "Заказ пуст или не найден")
+                return
+
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить данные заказа: {str(e)}")
+            print(f"Ошибка при загрузке заказа: {e}")  # Для отладки
+            return
+        finally:
+            conn.close()
+
+        # Настраиваем таблицу
+        self.tableWidget.setRowCount(len(order_items))
+        self.tableWidget.setColumnCount(5)
+
+        headers = ['Товар', 'Бренд', 'Количество', 'Цена за шт.', 'Общая стоимость']
+        self.tableWidget.setHorizontalHeaderLabels(headers)
+
+        total_order_sum = 0
+
+        for row, item in enumerate(order_items):
+            name, brand, quantity, price, total = item
+
+            # Название товара
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(str(name)))
+            # Бренд
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(str(brand) if brand else "-"))
+            # Количество
+            self.tableWidget.setItem(row, 2, QTableWidgetItem(str(quantity)))
+            # Цена за штуку
+            self.tableWidget.setItem(row, 3, QTableWidgetItem(f"{float(price):.2f} руб."))
+            # Общая стоимость позиции
+            self.tableWidget.setItem(row, 4, QTableWidgetItem(f"{float(total):.2f} руб."))
+
+            total_order_sum += float(total)
+
+        # Добавляем итоговую строку
+        if order_items:
+            self.tableWidget.setRowCount(len(order_items) + 1)
+            total_row = len(order_items)
+
+            # Объединяем ячейки для итоговой строки
+            self.tableWidget.setItem(total_row, 0, QTableWidgetItem("ИТОГО:"))
+            self.tableWidget.setSpan(total_row, 0, 1, 4)  # Объединяем первые 4 колонки
+            self.tableWidget.setItem(total_row, 4, QTableWidgetItem(f"{total_order_sum:.2f} руб."))
+
+            # Выделяем итоговую строку жирным
+            font = QtGui.QFont()
+            font.setBold(True)
+            for col in range(5):
+                item = self.tableWidget.item(total_row, col)
+                if item:
+                    item.setFont(font)
+
+        self.tableWidget.resizeColumnsToContents()
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+
+    # Удалите метод open_cart если кнопки pushButton_2 нет в UI
+    # def open_cart(self):
+    #     self.close()
+    #     self.win = ShoppingCart(self.user_id)
+    #     self.win.show()
 
 class HistoryOrder(QDialog, Ui_History_Order_Form):
     def __init__(self, user_id = None):
@@ -324,6 +480,52 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
         super().__init__()
         self.setupUi(self)
 
+        self.pushButton_7.clicked.connect(self.create_order)
+
+    def create_order(self):
+        """Создание заказа из корзины"""
+        if not hasattr(self, 'cart_items') or not self.cart_items:
+            QMessageBox.warning(self, "Ошибка", "Корзина пуста!")
+            return
+
+        connect = get_connection()
+        c = connect.cursor()
+
+        try:
+            # Рассчитываем общую сумму заказа
+            total_sum = sum(item['price'] * item['quantity'] for item in self.cart_items)
+
+            # Создаем заказ
+            from datetime import date
+            today = date.today().isoformat()
+
+            c.execute('''INSERT INTO user_order (user_id, date, status, sum) 
+                         VALUES (?, ?, ?, ?)''',
+                      (self.user_id, today, 'Оформлен', total_sum))
+
+            order_id = c.lastrowid
+
+            # Добавляем позиции заказа
+            for item in self.cart_items:
+                c.execute('''INSERT INTO order_position (order_id, product_id, quantity, price_at_time) 
+                             VALUES (?, ?, ?, ?)''',
+                          (order_id, item['product_id'], item['quantity'], item['price']))
+
+            # Очищаем корзину
+            self.cart_items = []
+            self.update_cart_display()
+
+            connect.commit()
+            QMessageBox.information(self, "Успех", f"Заказ №{order_id} успешно оформлен!")
+
+            # Переходим к просмотру заказов
+            self.open_order_window()
+
+        except Exception as e:
+            connect.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Не удалось оформить заказ: {str(e)}")
+        finally:
+            connect.close()
 
 class AdminPanel(QDialog, Ui_Admin_Form):
     def __init__(self, user_id = None):
@@ -356,7 +558,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
 
     def open_profile_menu(self):
         self.close()
-        self.win = ProfileWin(self.current_user_id, user_type="employee")
+        self.win = UserDataWin(self.current_user_id, user_type="employee")
         self.win.show()
 
     def open_main_window_return(self):
@@ -391,8 +593,8 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         data = c.fetchall()
         conn.close()
 
-        table_widget_5 = self.tableWidget
-        self.populate_table(table_widget_5, data)
+        table_widget = self.tableWidget
+        self.populate_table(table_widget, data)
 
     def load_employees_to_table(self):
         conn = get_connection()
@@ -445,8 +647,8 @@ class AdminPanel(QDialog, Ui_Admin_Form):
 
     def on_tab_changed(self, index):
         """Обработчик смены вкладки"""
-        # if index == 0:  # Вкладка "Заказы"
-        #     self.load_orders_to_table()
+        if index == 0:  # Вкладка "Заказы"
+            self.load_orders_to_table()
         # elif index == 1:  # Вкладка "Товары"
         #     self.load_products_to_table()
         # elif index == 2:  # Вкладка "Отзывы"

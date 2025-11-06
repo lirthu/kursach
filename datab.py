@@ -87,5 +87,21 @@ CREATE TABLE IF NOT EXISTS application (
     FOREIGN KEY (user_id) REFERENCES user (id),
     FOREIGN KEY (employee_id) REFERENCES employee (id))
 ''')
+c.execute('''
+CREATE TABLE IF NOT EXISTS cart (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,  
+    created_date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id))
+''')
+c.execute('''
+CREATE TABLE IF NOT EXISTS cart_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cart_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    FOREIGN KEY (cart_id) REFERENCES cart (id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product (id))
+''')
 connect.commit()
 
