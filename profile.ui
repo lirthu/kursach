@@ -178,17 +178,16 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="leftMargin">
+      <number>200</number>
+     </property>
+     <property name="rightMargin">
+      <number>200</number>
+     </property>
      <item>
       <widget class="QPushButton" name="pushButton">
        <property name="text">
         <string>Сохранить данные</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Назад</string>
        </property>
       </widget>
      </item>
