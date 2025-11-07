@@ -139,4 +139,4 @@ class Ui_Order_Form(object):
         item.setText(_translate("Form", "Статус"))
         item = self.tableWidget.horizontalHeaderItem(4)
         item.setText(_translate("Form", "Стоимость"))
-        self.pushButton_6.setText(_translate("Form", "Назад"))
+        self.pushButton_6.setText(_translate("Form", "Выйти"))

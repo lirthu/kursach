@@ -250,7 +250,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
      <property name="spacing">
       <number>20</number>
      </property>
@@ -260,32 +260,6 @@
      <property name="rightMargin">
       <number>30</number>
      </property>
-     <item>
-      <widget class="QPushButton" name="pushButton_7">
-       <property name="font">
-        <font>
-         <family>Segoe Print</family>
-         <pointsize>11</pointsize>
-         <underline>false</underline>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
-       </property>
-       <property name="text">
-        <string>Оформить заказ</string>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>48</width>
-         <height>48</height>
-        </size>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="pushButton_5">
        <property name="font">
