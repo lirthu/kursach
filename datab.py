@@ -81,31 +81,11 @@ CREATE TABLE IF NOT EXISTS application (
     user_id INTEGER NOT NULL,
     employee_id INTEGER NOT NULL,
     status TEXT CHECK(status IN ('Новая', 'В обработке', 'Выполнена', 'Отклонена')) DEFAULT 'Новая',
-    date DATE NOT NULL,
+    date_open DATE NOT NULL,
+    date_close DATE,
     description TEXT,
     FOREIGN KEY (user_id) REFERENCES user (id),
     FOREIGN KEY (employee_id) REFERENCES employee (id))
 ''')
-c.execute('''
-CREATE TABLE IF NOT EXISTS cart (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL UNIQUE,  
-    created_date DATE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id))
-''')
-c.execute('''
-CREATE TABLE IF NOT EXISTS cart_item (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cart_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    FOREIGN KEY (cart_id) REFERENCES cart (id),
-    FOREIGN KEY (product_id) REFERENCES product (id))
-''')
-c.execute('''select * from user''')
-result = c.fetchall()
-for i in result:
-    print(dict(i))
-
 connect.commit()
 
