@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS product (
     brand VARCHAR(20),
     description TEXT,
     price DECIMAL(10,2),
+    image_path TEXT,
     FOREIGN KEY (category_id) REFERENCES category (id))
 ''')
 c.execute('''
@@ -47,7 +48,7 @@ CREATE TABLE IF NOT EXISTS order_position (
     order_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
-    price_at_time REAL NOT NULL, 
+    price_at_time REAL NOT NULL,
     FOREIGN KEY (order_id) REFERENCES user_order (id),
     FOREIGN KEY (product_id) REFERENCES product (id)
 )
@@ -89,7 +90,7 @@ CREATE TABLE IF NOT EXISTS application (
 c.execute('''
 CREATE TABLE IF NOT EXISTS cart (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL UNIQUE,  
+    user_id INTEGER NOT NULL UNIQUE,
     created_date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user (id))
 ''')
@@ -102,10 +103,15 @@ CREATE TABLE IF NOT EXISTS cart_item (
     FOREIGN KEY (cart_id) REFERENCES cart (id),
     FOREIGN KEY (product_id) REFERENCES product (id))
 ''')
-c.execute('''select * from user''')
-result = c.fetchall()
-for i in result:
-    print(dict(i))
-
+c.execute('''INSERT OR IGNORE INTO employee 
+    (first_name, last_name, third_name, login, password, phone, email, address)
+    VALUES ('Ваня','Петров','Иванович','admin','1234','+79990000000','admin@example.com','адрес')''')
+c.execute('''SELECT * FROM cart''')
+res = c.fetchall()
+for r in res:
+    print(dict(r))
+c.execute('''SELECT * FROM cart_item''')
+res1 = c.fetchall()
+for t in res1:
+    print(dict(t))
 connect.commit()
-

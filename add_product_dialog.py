@@ -78,6 +78,34 @@ class Ui_AddProductDialog(object):
 
         self.verticalLayout.addLayout(self.formLayout)
 
+        # Добавьте после поля "Бренд" в setupUi:
+
+        # Изображение
+        self.label_image = QtWidgets.QLabel(Dialog)
+        self.label_image.setObjectName("label_image")
+        self.horizontalLayout_image = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_image.setObjectName("horizontalLayout_image")
+        self.lineEdit_image = QtWidgets.QLineEdit(Dialog)
+        self.lineEdit_image.setObjectName("lineEdit_image")
+        self.lineEdit_image.setReadOnly(True)  # Только для отображения
+        self.pushButton_browse = QtWidgets.QPushButton(Dialog)
+        self.pushButton_browse.setObjectName("pushButton_browse")
+        self.pushButton_browse.setText("Обзор...")
+        self.horizontalLayout_image.addWidget(self.lineEdit_image)
+        self.horizontalLayout_image.addWidget(self.pushButton_browse)
+        self.formLayout.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.label_image)
+        self.formLayout.setLayout(5, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_image)
+
+        # Превью изображения
+        self.label_image_preview = QtWidgets.QLabel(Dialog)
+        self.label_image_preview.setMinimumSize(200, 200)
+        self.label_image_preview.setMaximumSize(200, 200)
+        self.label_image_preview.setFrameShape(QtWidgets.QFrame.Box)
+        self.label_image_preview.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_image_preview.setText("Нет изображения")
+        self.label_image_preview.setObjectName("label_image_preview")
+        self.formLayout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.label_image_preview)
+
         # Кнопки
         self.horizontalLayout_buttons = QtWidgets.QHBoxLayout()
         self.horizontalLayout_buttons.setObjectName("horizontalLayout_buttons")
@@ -106,5 +134,6 @@ class Ui_AddProductDialog(object):
         self.label_price.setText(_translate("Dialog", "Цена:"))
         self.label_category.setText(_translate("Dialog", "Категория:"))
         self.label_brand.setText(_translate("Dialog", "Бренд:"))
+        self.label_image.setText(_translate("Dialog", "Изображение:"))
         self.pushButton_cancel.setText(_translate("Dialog", "Отмена"))
         self.pushButton_save.setText(_translate("Dialog", "Сохранить"))

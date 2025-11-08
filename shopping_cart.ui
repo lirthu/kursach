@@ -152,6 +152,11 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tableWidget">
+     <property name="font">
+      <font>
+       <family>Segoe Print</family>
+      </font>
+     </property>
      <column>
       <property name="text">
        <string>Товар</string>
@@ -185,7 +190,7 @@
       <number>0</number>
      </property>
      <property name="leftMargin">
-      <number>780</number>
+      <number>750</number>
      </property>
      <property name="rightMargin">
       <number>20</number>
@@ -221,7 +226,7 @@
         <cursorShape>ArrowCursor</cursorShape>
        </property>
        <property name="text">
-        <string>20</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -276,7 +281,7 @@
         <string notr="true">background-color: transparent</string>
        </property>
        <property name="text">
-        <string>Сохранить изменения</string>
+        <string>Оформить заказ</string>
        </property>
        <property name="iconSize">
         <size>
