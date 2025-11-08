@@ -11,14 +11,11 @@ from admin_panel import Ui_Admin_Form
 from profile import Ui_Profile_Form
 from catalog import Ui_Catalog_Form
 from shopping_cart import Ui_Cart_Form
-from c_application import Ui_Create_Application_Form
 from order import Ui_Order_Form
 from order_content import Ui_Content_Form
-from application_view import Ui_Application_Form
 from add_product_dialog import Ui_AddProductDialog
 from add_order_with_products import Ui_AddOrderWithProductsDialog
 from add_review_dialog import Ui_AddReviewDialog
-from add_application_dialog import Ui_AddApplicationDialog
 from add_user_dialog import Ui_AddUserDialog
 from add_employee_dialog import Ui_AddEmployeeDialog
 from edit_product_dialog import Ui_EditProductDialog
@@ -26,7 +23,6 @@ from edit_user_dialog import Ui_EditUserDialog
 from edit_employee_dialog import Ui_EditEmployeeDialog
 from edit_order_with_products import Ui_EditOrderWithProductsDialog
 from edit_review_dialog import Ui_EditReviewDialog
-from edit_application_dialog import Ui_EditApplicationDialog
 from add_category_dialog import Ui_AddCategoryDialog
 from edit_category_dialog import Ui_EditCategoryDialog
 
@@ -564,14 +560,12 @@ class ProfileMenuManager:
         # Добавляем пункты меню
         open_profile_menu = profile_menu.addAction("Личные данные")
         open_order_menu = profile_menu.addAction("Заказы")
-        application = profile_menu.addAction("Заявки")
         profile_menu.addSeparator()
         back_to_log = profile_menu.addAction("Выйти")
 
         open_profile_menu.triggered.connect(lambda: self.open_profile_menu(parent_window))
         open_order_menu.triggered.connect(lambda: self.open_order_menu(parent_window))
         back_to_log.triggered.connect(lambda: self.open_main_window_return(parent_window))
-        application.triggered.connect(lambda: self.open_application_menu(parent_window))
         return profile_menu
 
     def open_profile_menu(self, parent_window):
@@ -581,11 +575,6 @@ class ProfileMenuManager:
     def open_order_menu(self, parent_window):
         parent_window.close()
         parent_window.win = OrderWin(self.user_id)
-        parent_window.win.show()
-
-    def open_application_menu(self, parent_window):
-        parent_window.close()
-        parent_window.win = Application(self.user_id)
         parent_window.win.show()
 
     def open_main_window_return(self, parent_window):
@@ -602,9 +591,15 @@ class OrderWin(QDialog, Ui_Order_Form):
 
         menu_manager = ProfileMenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
+        self.pushButton_6.clicked.connect(self.exit_to_catalog)
 
         # Загружаем заказы пользователя
         self.load_user_orders()
+
+    def exit_to_catalog(self):
+        self.close()
+        self.win = CatalogWin(self.user_id)
+        self.win.show()
 
     def load_user_orders(self):
         """Загрузка заказов пользователя из БД"""
@@ -682,27 +677,6 @@ class OrderContent(QDialog, Ui_Content_Form):
     def __init__(self, user_id = None):
         super().__init__()
         self.setupUi(self)
-
-class Application(QDialog, Ui_Application_Form):
-    def __init__(self, user_id = None):
-        super().__init__()
-        self.setupUi(self)
-        self.user_id = user_id
-        menu_manager = ProfileMenuManager(user_id, 'user')
-        self.pushButton.setMenu(menu_manager.create_profile_menu(self))
-
-        self.pushButton_6.clicked.connect(self.open_main_window_return)
-
-    def open_main_window_return(self):
-        self.close()
-        self.win = CatalogWin(self.user_id)
-        self.win.show()
-
-class CreateApplication(QDialog, Ui_Create_Application_Form):
-    def __init__(self, user_id = None):
-        super().__init__()
-        self.setupUi(self)
-
 
 class ShoppingCart(QDialog, Ui_Cart_Form):
     def __init__(self, user_id=None):
@@ -1036,9 +1010,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.add_user()
         elif current_tab == 4:  # Сотрудники
             self.add_employee()
-        elif current_tab == 5:  # Заявки
-            self.add_application()
-        elif current_tab == 6:  # Категории
+        elif current_tab == 5:  # Категории
             self.add_category()
 
     def add_product(self):
@@ -1057,11 +1029,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         dialog = AddReviewDialog(self)
         if dialog.exec_() == QDialog.Accepted:
             self.load_reviews_to_table()
-
-    def add_application(self):
-        dialog = AddApplicationDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
-            self.load_applications_to_table()
 
     def add_user(self):
         dialog = AddUserDialog(self)
@@ -1094,9 +1061,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.edit_user()
         elif current_tab == 4:  # Сотрудники
             self.edit_employee()
-        elif current_tab == 5:  # Заявки
-            self.edit_application()
-        elif current_tab == 6:  # Категории
+        elif current_tab == 5:  # Категории
             self.edit_category()
 
     def edit_product(self):
@@ -1176,21 +1141,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         if dialog.exec_() == QDialog.Accepted:
             self.load_reviews_to_table()
 
-    def edit_application(self):
-        """Редактирование выбранной заявки"""
-        table_widget = self.tableWidget_6
-        current_row = table_widget.currentRow()
-
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите заявку для редактирования")
-            return
-
-        application_id = table_widget.item(current_row, 0).text()
-
-        dialog = EditApplicationDialog(self, application_id)
-        if dialog.exec_() == QDialog.Accepted:
-            self.load_applications_to_table()
-
     def edit_category(self):
         """Редактирование выбранной категории"""
         table_widget = self.tableWidget_7
@@ -1222,9 +1172,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.delete_user()
         elif current_tab == 4:  # Сотрудники
             self.delete_employee()
-        elif current_tab == 5:  # Заявки
-            self.delete_application()
-        elif current_tab == 6:  # Категории
+        elif current_tab == 5:  # Категории
             self.delete_category()
 
     def delete_product(self):
@@ -1302,30 +1250,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 QMessageBox.information(self, "Успех", "Отзыв удален")
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось удалить отзыв: {str(e)}")
-            finally:
-                conn.close()
-
-    def delete_application(self):
-        table_widget = self.tableWidget_6
-        current_row = table_widget.currentRow()
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите заявку для удаления")
-            return
-
-        application_id = table_widget.item(current_row, 0).text()
-        reply = QMessageBox.question(self, "Подтверждение", "Удалить выбранную заявку?",
-                                     QMessageBox.Yes | QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            conn = get_connection()
-            c = conn.cursor()
-            try:
-                c.execute("DELETE FROM application WHERE id = ?", (application_id,))
-                conn.commit()
-                self.load_applications_to_table()
-                QMessageBox.information(self, "Успех", "Заявка удалена")
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить заявку: {str(e)}")
             finally:
                 conn.close()
 
@@ -1504,17 +1428,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         table_widget = self.tableWidget_4
         self.populate_table(table_widget, data)
 
-    def load_applications_to_table(self):
-        conn = get_connection()
-        c = conn.cursor()
-        c.execute('''SELECT id, user_id, employee_id, status, date, description
-                                     FROM application''')
-        data = c.fetchall()
-        conn.close()
-
-        table_widget = self.tableWidget_6
-        self.populate_applications_table(table_widget, data)
-
     def load_categories_to_table(self):
         """Загрузка категорий в таблицу"""
         conn = get_connection()
@@ -1625,25 +1538,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         table_widget.verticalHeader().setVisible(False)
         table_widget.resizeColumnsToContents()
 
-    def populate_applications_table(self, table_widget, data):
-        if not data:
-            table_widget.setRowCount(0)
-            table_widget.setColumnCount(0)
-            return
-
-        table_widget.setRowCount(len(data))
-        table_widget.setColumnCount(len(data[0]))
-
-        headers = ['ID', 'Пользователь', 'Сотрудник', 'Статус', 'Дата', 'Описание']
-        table_widget.setHorizontalHeaderLabels(headers)
-
-        for row_num, row_data in enumerate(data):
-            for col_num, cell_data in enumerate(row_data):
-                table_widget.setItem(row_num, col_num, QTableWidgetItem(str(cell_data)))
-
-        table_widget.verticalHeader().setVisible(False)
-        table_widget.resizeColumnsToContents()
-
     def on_tab_changed(self, index):
         """Обработчик смены вкладки"""
         try:
@@ -1657,9 +1551,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 self.load_users_to_table()
             elif index == 4:  # Сотрудники
                 self.load_employees_to_table()
-            elif index == 5:  # Заявки
-                self.load_applications_to_table()
-            elif index == 6:  # Категории
+            elif index == 5:  # Категории
                 self.load_categories_to_table()
 
         except Exception as e:
@@ -2023,84 +1915,6 @@ class AddReviewDialog(QDialog, Ui_AddReviewDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось добавить отзыв: {str(e)}")
         finally:
             conn.close()
-
-
-class AddApplicationDialog(QDialog, Ui_AddApplicationDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
-        self.pushButton_save.clicked.connect(self.save_application)
-        self.pushButton_cancel.clicked.connect(self.reject)
-
-        self.load_users_from_db()
-        self.load_employees_from_db()
-        self.setup_status_combo()
-
-    def load_users_from_db(self):
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, first_name, last_name FROM user")
-            users = c.fetchall()
-            self.comboBox_user.clear()
-            self.comboBox_user.addItem("")
-            for user in users:
-                self.comboBox_user.addItem(f"{user[1]} {user[2]}", user[0])
-        except Exception as e:
-            print(f"Ошибка загрузки пользователей: {e}")
-        finally:
-            conn.close()
-
-    def load_employees_from_db(self):
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, first_name, last_name FROM employee")
-            employees = c.fetchall()
-            self.comboBox_employee.clear()
-            self.comboBox_employee.addItem("")
-            for employee in employees:
-                self.comboBox_employee.addItem(f"{employee[1]} {employee[2]}", employee[0])
-        except Exception as e:
-            print(f"Ошибка загрузки сотрудников: {e}")
-        finally:
-            conn.close()
-
-    def setup_status_combo(self):
-        self.comboBox_status.clear()
-        self.comboBox_status.addItems(["Новая", "В обработке", "Выполнена", "Отклонена"])
-
-    def save_application(self):
-        user_id = self.comboBox_user.currentData()
-        employee_id = self.comboBox_employee.currentData()
-        status = self.comboBox_status.currentText()
-        description = self.textEdit_description.toPlainText().strip()
-
-        if not user_id:
-            QMessageBox.warning(self, "Ошибка", "Выберите пользователя")
-            return
-        if not employee_id:
-            QMessageBox.warning(self, "Ошибка", "Выберите сотрудника")
-            return
-
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            from datetime import datetime
-            current_date = datetime.now().strftime("%Y-%m-%d")
-
-            c.execute('''INSERT INTO application (user_id, employee_id, status, date, description) 
-                        VALUES (?, ?, ?, ?, ?)''',
-                      (user_id, employee_id, status, current_date, description))
-            conn.commit()
-            QMessageBox.information(self, "Успех", "Заявка успешно добавлена")
-            self.accept()
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось добавить заявку: {str(e)}")
-        finally:
-            conn.close()
-
 
 class AddUserDialog(QDialog, Ui_AddUserDialog):
     def __init__(self, parent=None):
@@ -2695,125 +2509,6 @@ class EditReviewDialog(QDialog, Ui_EditReviewDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось обновить отзыв: {str(e)}")
         finally:
             conn.close()
-
-
-class EditApplicationDialog(QDialog, Ui_EditApplicationDialog):
-    def __init__(self, parent=None, application_id=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        self.application_id = application_id
-
-        self.pushButton_save.clicked.connect(self.save_changes)
-        self.pushButton_cancel.clicked.connect(self.reject)
-
-        self.load_employees_from_db()
-        self.setup_status_combo()
-        self.load_application_data()
-
-    def load_employees_from_db(self):
-        """Загружаем сотрудников из базы данных"""
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, first_name, last_name FROM employee")
-            employees = c.fetchall()
-            self.comboBox_employee.clear()
-            self.comboBox_employee.addItem("Не назначен", None)  # Пустой вариант
-            for employee in employees:
-                self.comboBox_employee.addItem(f"{employee[1]} {employee[2]}", employee[0])
-        except Exception as e:
-            print(f"Ошибка загрузки сотрудников: {e}")
-        finally:
-            conn.close()
-
-    def setup_status_combo(self):
-        """Заполняем статусы заявок"""
-        self.comboBox_status.clear()
-        self.comboBox_status.addItems(["Новая", "В обработке", "Выполнена", "Отклонена"])
-
-    def load_application_data(self):
-        """Загружаем данные заявки"""
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            # Упрощенный запрос - только основные данные из таблицы application
-            c.execute('''SELECT user_id, employee_id, status, date, description
-                         FROM application 
-                         WHERE id = ?''', (self.application_id,))
-            app_data = c.fetchone()
-
-            if app_data:
-                user_id, employee_id, status, date, description = app_data
-
-                # Получаем имя пользователя отдельным запросом
-                if user_id:
-                    c.execute("SELECT first_name, last_name FROM user WHERE id = ?", (user_id,))
-                    user_data = c.fetchone()
-                    user_name = f"{user_data[0]} {user_data[1]}" if user_data else "Неизвестный пользователь"
-                else:
-                    user_name = "Неизвестный пользователь"
-
-                # Устанавливаем пользователя (только для просмотра)
-                self.label_user_name.setText(user_name)
-
-                # Устанавливаем дату (только для просмотра)
-                self.label_date_value.setText(date or "Не указана")
-
-                # Устанавливаем сотрудника в комбобокс
-                if employee_id:
-                    index = self.comboBox_employee.findData(employee_id)
-                    if index >= 0:
-                        self.comboBox_employee.setCurrentIndex(index)
-                else:
-                    self.comboBox_employee.setCurrentIndex(0)  # "Не назначен"
-
-                # Устанавливаем статус
-                index = self.comboBox_status.findText(status)
-                if index >= 0:
-                    self.comboBox_status.setCurrentIndex(index)
-
-                # Устанавливаем описание
-                self.textEdit_description.setPlainText(description or "")
-
-        except Exception as e:
-            print(f"Ошибка загрузки данных заявки: {e}")
-        finally:
-            conn.close()
-
-    def save_changes(self):
-        """Сохраняем изменения заявки"""
-        employee_id = self.comboBox_employee.currentData()
-        status = self.comboBox_status.currentText()
-        description = self.textEdit_description.toPlainText().strip()
-
-        # Проверяем, выбран ли сотрудник
-        if not employee_id and status != "Новая":
-            QMessageBox.warning(self, "Ошибка", "Для изменения статуса необходимо назначить сотрудника")
-            return
-
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute('''UPDATE application SET employee_id=?, status=?, description=?
-            WHERE id=?''',(employee_id, status, description, self.application_id))
-
-            conn.commit()
-
-            # Показываем информативное сообщение
-            employee_name = self.comboBox_employee.currentText()
-            message = f"Заявка успешно обновлена!\n"
-            message += f"Статус: {status}\n"
-            if employee_id:
-                message += f"Ответственный: {employee_name}"
-
-            QMessageBox.information(self, "Успех", message)
-            self.accept()
-
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить заявку: {str(e)}")
-        finally:
-            conn.close()
-
 
 class EditCategoryDialog(QDialog, Ui_EditCategoryDialog):
     def __init__(self, parent=None, category_id=None):

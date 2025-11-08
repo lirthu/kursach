@@ -206,7 +206,7 @@
         <string notr="true">background-color: transparent</string>
        </property>
        <property name="text">
-        <string>Выйти</string>
+        <string>Назад</string>
        </property>
        <property name="iconSize">
         <size>

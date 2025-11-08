@@ -84,14 +84,6 @@ class Ui_Admin_Form(object):
         self.tableWidget_5.setColumnCount(0)
         self.tableWidget_5.setRowCount(0)
         self.tabWidget.addTab(self.tab_5, "")
-        self.tab_6 = QtWidgets.QWidget()
-        self.tab_6.setObjectName("tab_6")
-        self.tableWidget_6 = QtWidgets.QTableWidget(self.tab_6)
-        self.tableWidget_6.setGeometry(QtCore.QRect(0, 0, 1061, 491))
-        self.tableWidget_6.setObjectName("tableWidget_6")
-        self.tableWidget_6.setColumnCount(0)
-        self.tableWidget_6.setRowCount(0)
-        self.tabWidget.addTab(self.tab_6, "")
         self.tab_7 = QtWidgets.QWidget()
         self.tab_7.setObjectName("tab_7")
         self.tableWidget_7 = QtWidgets.QTableWidget(self.tab_7)
@@ -117,7 +109,7 @@ class Ui_Admin_Form(object):
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(Form)
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(5)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
@@ -130,7 +122,6 @@ class Ui_Admin_Form(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("Form", "Отзывы"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("Form", "Клиенты"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("Form", "Сотрудники"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("Form", "Заявки"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), _translate("Form", "Категории"))
         self.pushButton_2.setText(_translate("Form", "Добавить"))
         self.pushButton_4.setText(_translate("Form", "Изменить "))

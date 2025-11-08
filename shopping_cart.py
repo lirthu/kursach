@@ -189,4 +189,4 @@ class Ui_Cart_Form(object):
         self.label_2.setText(_translate("Form", "Сумма заказа:"))
         self.label_4.setText(_translate("Form", "руб"))
         self.pushButton_5.setText(_translate("Form", "Оформить заказ"))
-        self.pushButton_6.setText(_translate("Form", "Выйти"))
+        self.pushButton_6.setText(_translate("Form", "Назад"))
