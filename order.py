@@ -126,7 +126,7 @@ class Ui_Order_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Заказы"))
         self.pushButton_4.setText(_translate("Form", "Каталог"))
         self.label.setText(_translate("Form", "Поиск:"))
         item = self.tableWidget.horizontalHeaderItem(0)

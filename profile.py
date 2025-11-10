@@ -128,7 +128,7 @@ class Ui_Profile_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Профиль"))
         self.label.setText(_translate("Form", "Личные данные"))
         self.label_2.setText(_translate("Form", "Фамилия"))
         self.label_3.setText(_translate("Form", "Имя"))

@@ -11,12 +11,12 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Каталог</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_6">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,9">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
@@ -154,24 +154,22 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,9">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,0,0,0,0,0,0,0,9">
-       <property name="bottomMargin">
-        <number>0</number>
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0,0,0,0">
+       <property name="spacing">
+        <number>6</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QComboBox" name="comboBox">
-           <property name="font">
-            <font>
-             <family>Segoe Print</family>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QComboBox {
+        <widget class="QComboBox" name="comboBox_3">
+         <property name="font">
+          <font>
+           <family>Segoe Print</family>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QComboBox {
     background-color: transparent;
 }
 
@@ -179,80 +177,23 @@ QComboBox QAbstractItemView {
     background-color: white;
     border: 1px solid gray;
 }к</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Наличие</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>В наличии</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string extracomment="23к2к23">Не в наличии</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Рейтинг 4+</string>
-            </property>
-           </item>
-          </widget>
+         </property>
+         <item>
+          <property name="text">
+           <string>Сортировать</string>
+          </property>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_2">
-           <property name="font">
-            <font>
-             <family>Segoe Print</family>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QComboBox {
-    background-color: transparent;
-}
-
-QComboBox QAbstractItemView {
-    background-color: white;
-    border: 1px solid gray;
-}к</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Бренд</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Bosh</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string extracomment="23к2к23">Samsung</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Philips</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LG</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>New Item</string>
-            </property>
-           </item>
-          </widget>
+          <property name="text">
+           <string>От А до Я</string>
+          </property>
          </item>
-        </layout>
+         <item>
+          <property name="text">
+           <string extracomment="23к2к23">От Я до А</string>
+          </property>
+         </item>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="label_2">
@@ -293,14 +234,7 @@ QComboBox QAbstractItemView {
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_3"/>
-       </item>
-       <item>
-        <widget class="QSlider" name="horizontalSlider_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="lineEdit_2"/>
        </item>
        <item>
         <widget class="QLabel" name="label_4">
@@ -322,120 +256,57 @@ QComboBox QAbstractItemView {
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="lineEdit_3"/>
        </item>
        <item>
-        <widget class="QSlider" name="horizontalSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>250</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="pushButton_5">
-           <property name="font">
-            <font>
-             <family>Segoe Print</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: transparent;</string>
-           </property>
-           <property name="text">
-            <string>Применить фильтры</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_6">
-           <property name="font">
-            <font>
-             <family>Segoe Print</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: transparent;</string>
-           </property>
-           <property name="text">
-            <string>Сбросить фильтры</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QListWidget" name="listcard">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <property name="bottomMargin">
-        <number>600</number>
-       </property>
-       <item>
-        <widget class="QComboBox" name="comboBox_3">
+        <widget class="QPushButton" name="pushButton_5">
          <property name="font">
           <font>
            <family>Segoe Print</family>
-           <pointsize>11</pointsize>
+           <pointsize>12</pointsize>
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">QComboBox {
-    background-color: transparent;
-}
-
-QComboBox QAbstractItemView {
-    background-color: white;
-    border: 1px solid gray;
-}к</string>
+          <string notr="true">background-color: transparent;</string>
          </property>
-         <item>
-          <property name="text">
-           <string>Сортировать</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>От А до Я</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string extracomment="23к2к23">От Я до А</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>По оценке ↑</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>По оценке ↓</string>
-          </property>
-         </item>
+         <property name="text">
+          <string>Применить фильтры</string>
+         </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_6">
+         <property name="font">
+          <font>
+           <family>Segoe Print</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+         <property name="text">
+          <string>Сбросить фильтры</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget" native="true"/>
      </item>
     </layout>
    </item>

@@ -12,19 +12,16 @@ from profile import Ui_Profile_Form
 from catalog import Ui_Catalog_Form
 from shopping_cart import Ui_Cart_Form
 from order import Ui_Order_Form
-from order_content import Ui_Content_Form
 from add_product_dialog import Ui_AddProductDialog
 from add_order_with_products import Ui_AddOrderWithProductsDialog
-from add_review_dialog import Ui_AddReviewDialog
 from add_user_dialog import Ui_AddUserDialog
 from add_employee_dialog import Ui_AddEmployeeDialog
+from add_category_dialog import Ui_AddCategoryDialog
+from edit_order_with_products import Ui_EditOrderWithProductsDialog
 from edit_product_dialog import Ui_EditProductDialog
 from edit_user_dialog import Ui_EditUserDialog
-from edit_employee_dialog import Ui_EditEmployeeDialog
-from edit_order_with_products import Ui_EditOrderWithProductsDialog
-from edit_review_dialog import Ui_EditReviewDialog
-from add_category_dialog import Ui_AddCategoryDialog
 from edit_category_dialog import Ui_EditCategoryDialog
+from edit_employee_dialog import Ui_EditEmployeeDialog
 
 def get_connection():
     connect = sqlite3.connect('database.db')
@@ -40,6 +37,16 @@ class MainWindow(QDialog, Ui_Auth_Form):
 
         self.pushButton_2.clicked.connect(self.open_register_window)
         self.pushButton.clicked.connect(self.clicked_login)
+        self.checkBox.stateChanged.connect(self.toggle_password_visibility)
+
+    def toggle_password_visibility(self, state):
+        """Переключение видимости пароля"""
+        if state == QtCore.Qt.Checked:
+            # Показываем пароль
+            self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Normal)
+        else:
+            # Скрываем пароль (точки)
+            self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
 
     def clicked_login(self):
         connect  = get_connection()
@@ -91,21 +98,32 @@ class RegisterWin(QDialog, Ui_Reg_Form):
         self.setupUi(self)
         self.pushButton.clicked.connect(self.registration)
         self.pushButton_2.clicked.connect(self.open_main_window_return)
+        self.checkBox.stateChanged.connect(self.toggle_password_visibility)
+
+    def toggle_password_visibility(self, state):
+        """Переключение видимости пароля"""
+        if state == QtCore.Qt.Checked:
+            # Показываем пароль
+            self.lineEdit_11.setEchoMode(QtWidgets.QLineEdit.Normal)
+            self.lineEdit_12.setEchoMode(QtWidgets.QLineEdit.Normal)
+        else:
+            # Скрываем пароль (точки)
+            self.lineEdit_11.setEchoMode(QtWidgets.QLineEdit.Password)
+            self.lineEdit_12.setEchoMode(QtWidgets.QLineEdit.Password)
 
     def registration(self):
         connect = get_connection()
         c = connect.cursor()
         try:
-            name = self.lineEdit_2.text().strip()
+            name = self.lineEdit_1.text().strip()
             last_name = self.lineEdit.text().strip()
-            third_name = self.lineEdit_3.text().strip()
-            login = self.lineEdit_7.text().strip()
-            password = self.lineEdit_8.text().strip()
-            return_password = self.lineEdit_9.text().strip()
-            phone = self.lineEdit_4.text().strip()
-            email = self.lineEdit_6.text().strip()
-            address = self.lineEdit_5.text().strip()
-
+            third_name = self.lineEdit_2.text().strip()
+            login = self.lineEdit_10.text().strip()
+            password = self.lineEdit_11.text().strip()
+            return_password = self.lineEdit_12.text().strip()
+            phone = self.lineEdit_3.text().strip()
+            email = self.lineEdit_9.text().strip()
+            address = self.lineEdit_4.text().strip()
 
             if not name or not last_name or not login or not password or not return_password:
                 QMessageBox.warning(self, "Внимание", "Заполните все поля.")
@@ -141,15 +159,20 @@ class RegisterWin(QDialog, Ui_Reg_Form):
         self.win.show()
 
 class CatalogWin(QDialog, Ui_Catalog_Form):
-    def __init__(self, user_id = None):
+    def __init__(self, user_id=None):
         super().__init__()
         self.setupUi(self)
         self.user_id = user_id
 
-        self.products_layout = QtWidgets.QVBoxLayout()
-        self.scrollAreaWidgetContents.setLayout(self.products_layout)
+        self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
+        self.showMaximized()
 
-        menu_manager = ProfileMenuManager(user_id, 'user')
+        # Получаем ссылку на widget для отображения товаров
+        self.products_widget = self.widget
+        self.products_layout = QtWidgets.QVBoxLayout(self.products_widget)
+        self.products_widget.setLayout(self.products_layout)
+
+        menu_manager = MenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_2.clicked.connect(self.open_cart_window)
 
@@ -163,6 +186,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
     def load_products(self):
         """Загрузка товаров из базы данных"""
         try:
+            # Очищаем виджет перед загрузкой новых товаров
             conn = get_connection()
             c = conn.cursor()
             c.execute('''SELECT id, name, brand, description, price, image_path 
@@ -178,11 +202,6 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
     def display_products(self, products):
         """Отображение товаров в виде карточек"""
         # Очищаем предыдущие карточки
-        for i in reversed(range(self.products_layout.count())):
-            item = self.products_layout.itemAt(i)
-            if item.widget():
-                item.widget().setParent(None)
-
         if not products:
             # Если товаров нет, показываем сообщение
             no_products_label = QtWidgets.QLabel("Товары не найдены")
@@ -209,7 +228,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
             # Переходим к следующей ячейке
             col += 1
-            if col >= 3:  # 3 колонки
+            if col >= 7:  # 3 колонки
                 col = 0
                 row += 1
 
@@ -420,18 +439,24 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         try:
             conn = get_connection()
             c = conn.cursor()
+
+            # Получаем основную информацию о товаре
             c.execute('''SELECT name, brand, description, price, image_path 
                          FROM product WHERE id = ?''', (product_id,))
             product = c.fetchone()
-            conn.close()
 
             if product:
-                name, brand, description, price, image_path = product
+                # Правильное обращение к данным через индексы
+                name = product[0] if product[0] else ""
+                brand = product[1] if product[1] else ""
+                description = product[2] if product[2] else ""
+                price = product[3] if product[3] else 0
+                image_path = product[4] if product[4] else ""
 
                 # Создаем диалог с подробной информацией
                 detail_dialog = QtWidgets.QDialog(self)
                 detail_dialog.setWindowTitle(f"Товар: {name}")
-                detail_dialog.resize(400, 500)
+                detail_dialog.resize(450, 550)
 
                 layout = QtWidgets.QVBoxLayout(detail_dialog)
 
@@ -444,20 +469,39 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
                     image_label.setPixmap(scaled_pixmap)
                 else:
                     image_label.setText("Изображение отсутствует")
+                    image_label.setStyleSheet("color: gray; font-size: 12px; font-family: 'Segoe Print';")
 
                 # Информация о товаре
-                info_text = f"<h2>{name}</h2>"
+                info_text = f"<h2 style='font-family: \"Segoe Print\"'>{name}</h2>"
                 if brand:
                     info_text += f"<p><b>Бренд:</b> {brand}</p>"
-                info_text += f"<p><b>Цена:</b> {float(price):.2f} руб.</p>"
+
+                info_text += f"<p><b>Цена:</b> <span style='color: #0078d7; font-weight: bold;'>{float(price):.2f} руб.</span></p>"
                 if description:
                     info_text += f"<p><b>Описание:</b><br>{description}</p>"
 
                 info_label = QtWidgets.QLabel(info_text)
                 info_label.setWordWrap(True)
+                info_label.setStyleSheet("font-family: 'Segoe Print'; font-size: 12px; line-height: 1.4;")
 
                 # Кнопка закрытия
                 close_btn = QtWidgets.QPushButton("Закрыть")
+                close_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #f0f0f0;
+                        color: #000000;
+                        border: 1px solid #cccccc;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        font-family: 'Segoe Print';
+                        font-size: 12px;
+                        padding: 8px 16px;
+                    }
+                    QPushButton:hover {
+                        background-color: #e0e0e0;
+                        border: 1px solid #999999;
+                    }
+                """)
                 close_btn.clicked.connect(detail_dialog.close)
 
                 layout.addWidget(image_label)
@@ -543,7 +587,7 @@ class ProfileWin(QDialog, Ui_Profile_Form):
         except Exception as e:
             print(e)
 
-class ProfileMenuManager:
+class MenuManager:
     def __init__(self, user_id, user_type='user'):
         self.user_id = user_id
         self.user_type = user_type
@@ -582,14 +626,16 @@ class ProfileMenuManager:
         parent_window.win = MainWindow()
         parent_window.win.show()
 
-
 class OrderWin(QDialog, Ui_Order_Form):
     def __init__(self, user_id=None):
         super().__init__()
         self.setupUi(self)
         self.user_id = user_id
 
-        menu_manager = ProfileMenuManager(user_id, 'user')
+        self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
+        self.showMaximized()
+
+        menu_manager = MenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_6.clicked.connect(self.exit_to_catalog)
 
@@ -672,21 +718,21 @@ class OrderWin(QDialog, Ui_Order_Form):
         # Устанавливаем сортировку по дате (новые сверху)
         self.tableWidget.sortItems(1, QtCore.Qt.DescendingOrder)
 
-
-class OrderContent(QDialog, Ui_Content_Form):
-    def __init__(self, user_id = None):
-        super().__init__()
-        self.setupUi(self)
-
 class ShoppingCart(QDialog, Ui_Cart_Form):
     def __init__(self, user_id=None):
         super().__init__()
         self.setupUi(self)
+
+        self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
+        self.showMaximized()
+
         self.user_id = user_id
         self.cart_items_data = {}  # Словарь для хранения данных о товарах {row: cart_item_id}
 
-        # Подключаем кнопки
-        self.pushButton_4.clicked.connect(self.open_catalog)
+        menu_manager = MenuManager(user_id, 'user')
+
+        self.pushButton.setMenu(menu_manager.create_profile_menu(self))
+        self.pushButton_2.clicked.connect(self.open_cart_window)
         self.pushButton_5.clicked.connect(self.create_order)
         self.pushButton_6.clicked.connect(self.exit_to_catalog)
         self.pushButton_3.clicked.connect(self.search_products)
@@ -697,11 +743,17 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
         # Настраиваем таблицу
         self.setup_table()
 
+    def open_cart_window(self):
+        self.close()
+        self.win = ShoppingCart(self.user_id)
+        self.win.show()
+
     def setup_table(self):
         """Настройка таблицы корзины"""
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setHorizontalHeaderLabels(["Товар", "Количество", "Цена", "Стоимость", "Удалить"])
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.horizontalHeader().setStretchLastSection(False)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
     def load_cart_data(self):
@@ -969,12 +1021,6 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
                 else:
                     self.tableWidget.setRowHidden(row, True)
 
-    def open_catalog(self):
-        """Переход в каталог"""
-        self.close()
-        self.win = CatalogWin(self.user_id)
-        self.win.show()
-
     def exit_to_catalog(self):
         """Выход в каталог"""
         self.close()
@@ -986,6 +1032,10 @@ class AdminPanel(QDialog, Ui_Admin_Form):
     def __init__(self, user_id = None):
         super().__init__()
         self.setupUi(self)
+
+        self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
+        self.showMaximized()
+
         self.current_user_id = user_id
         self.load_users_to_table()
         self.tabWidget.currentChanged.connect(self.on_tab_changed)
@@ -1004,13 +1054,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.add_order()
         elif current_tab == 1:  # Товары
             self.add_product()
-        elif current_tab == 2:  # Отзывы
-            self.add_review()
-        elif current_tab == 3:  # Клиенты
+        elif current_tab == 2:  # Клиенты
             self.add_user()
-        elif current_tab == 4:  # Сотрудники
+        elif current_tab == 3:  # Сотрудники
             self.add_employee()
-        elif current_tab == 5:  # Категории
+        elif current_tab == 4:  # Категории
             self.add_category()
 
     def add_product(self):
@@ -1024,11 +1072,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         dialog = AddOrderWithProductsDialog(self)
         if dialog.exec_() == QDialog.Accepted:
             self.load_orders_to_table()
-
-    def add_review(self):
-        dialog = AddReviewDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
-            self.load_reviews_to_table()
 
     def add_user(self):
         dialog = AddUserDialog(self)
@@ -1055,13 +1098,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.edit_order()
         elif current_tab == 1:  # Товары
             self.edit_product()
-        elif current_tab == 2:  # Отзывы
-            self.edit_review()
-        elif current_tab == 3:  # Клиенты
+        elif current_tab == 2:  # Клиенты
             self.edit_user()
-        elif current_tab == 4:  # Сотрудники
+        elif current_tab == 3:  # Сотрудники
             self.edit_employee()
-        elif current_tab == 5:  # Категории
+        elif current_tab == 4:  # Категории
             self.edit_category()
 
     def edit_product(self):
@@ -1126,21 +1167,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         if dialog.exec_() == QDialog.Accepted:
             self.load_orders_to_table()
 
-    def edit_review(self):
-        """Редактирование выбранного отзыва"""
-        table_widget = self.tableWidget_3
-        current_row = table_widget.currentRow()
-
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите отзыв для редактирования")
-            return
-
-        review_id = table_widget.item(current_row, 0).text()
-
-        dialog = EditReviewDialog(self, review_id)
-        if dialog.exec_() == QDialog.Accepted:
-            self.load_reviews_to_table()
-
     def edit_category(self):
         """Редактирование выбранной категории"""
         table_widget = self.tableWidget_7
@@ -1166,43 +1192,98 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             self.delete_order()
         elif current_tab == 1:  # Товары
             self.delete_product()
-        elif current_tab == 2:  # Отзывы
-            self.delete_review()
-        elif current_tab == 3:  # Клиенты
+        elif current_tab == 2:  # Клиенты
             self.delete_user()
-        elif current_tab == 4:  # Сотрудники
+        elif current_tab == 3:  # Сотрудники
             self.delete_employee()
-        elif current_tab == 5:  # Категории
+        elif current_tab == 4:  # Категории
             self.delete_category()
 
     def delete_product(self):
         """Удаление выбранного товара"""
-        table_widget = self.tableWidget_2
-        current_row = table_widget.currentRow()
+        try:
+            table_widget = self.tableWidget_2
+            current_row = table_widget.currentRow()
 
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите товар для удаления")
-            return
+            if current_row == -1:
+                QMessageBox.warning(self, "Ошибка", "Выберите товар для удаления")
+                return
 
-        product_id = table_widget.item(current_row, 0).text()
-        product_name = table_widget.item(current_row, 1).text()
+            # Безопасное получение ID товара
+            id_item = table_widget.item(current_row, 0)
+            if not id_item:
+                QMessageBox.warning(self, "Ошибка", "Не удалось получить ID товара")
+                return
 
-        reply = QMessageBox.question(self, "Подтверждение",
-                                     f"Вы уверены, что хотите удалить товар '{product_name}'?",
-                                     QMessageBox.Yes | QMessageBox.No)
+            product_id = id_item.text()
+            if not product_id.isdigit():
+                QMessageBox.warning(self, "Ошибка", "Некорректный ID товара")
+                return
 
-        if reply == QMessageBox.Yes:
-            conn = get_connection()
-            c = conn.cursor()
-            try:
-                c.execute("DELETE FROM product WHERE id = ?", (product_id,))
-                conn.commit()
-                self.load_products_to_table()
-                QMessageBox.information(self, "Успех", "Товар удален")
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить товар: {str(e)}")
-            finally:
-                conn.close()
+            # Получаем название товара для подтверждения
+            name_item = table_widget.item(current_row, 1)
+            product_name = name_item.text() if name_item else "Неизвестный товар"
+
+            reply = QMessageBox.question(
+                self,
+                "Подтверждение",
+                f"Вы уверены, что хотите удалить товар '{product_name}'?",
+                QMessageBox.Yes | QMessageBox.No
+            )
+
+            if reply == QMessageBox.Yes:
+                conn = get_connection()
+                c = conn.cursor()
+                try:
+                    # Проверяем, есть ли связанные записи в order_position
+                    c.execute("SELECT COUNT(*) FROM order_position WHERE product_id = ?", (product_id,))
+                    order_count = c.fetchone()[0]
+
+                    if order_count > 0:
+                        QMessageBox.warning(
+                            self,
+                            "Ошибка",
+                            f"Нельзя удалить товар '{product_name}'. "
+                            f"Он содержится в {order_count} заказах. "
+                            f"Сначала удалите связанные заказы."
+                        )
+                        return
+
+                    # Проверяем, есть ли товар в корзинах
+                    c.execute("SELECT COUNT(*) FROM cart_item WHERE product_id = ?", (product_id,))
+                    cart_count = c.fetchone()[0]
+
+                    if cart_count > 0:
+                        QMessageBox.warning(
+                            self,
+                            "Ошибка",
+                            f"Нельзя удалить товар '{product_name}'. "
+                            f"Он находится в {cart_count} корзинах."
+                        )
+                        return
+
+                    # Удаляем товар
+                    c.execute("DELETE FROM product WHERE id = ?", (product_id,))
+                    conn.commit()
+
+                    # Обновляем таблицу
+                    self.load_products_to_table()
+                    QMessageBox.information(self, "Успех", "Товар удален")
+
+                except sqlite3.IntegrityError as e:
+                    QMessageBox.critical(
+                        self,
+                        "Ошибка",
+                        f"Не удалось удалить товар из-за связей с другими таблицами: {str(e)}"
+                    )
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить товар: {str(e)}")
+                finally:
+                    conn.close()
+
+        except Exception as e:
+            print(f"Общая ошибка при удалении товара: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Произошла непредвиденная ошибка: {str(e)}")
 
     def delete_order(self):
         table_widget = self.tableWidget
@@ -1226,30 +1307,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 QMessageBox.information(self, "Успех", "Заказ удален")
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось удалить заказ: {str(e)}")
-            finally:
-                conn.close()
-
-    def delete_review(self):
-        table_widget = self.tableWidget_3
-        current_row = table_widget.currentRow()
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите отзыв для удаления")
-            return
-
-        review_id = table_widget.item(current_row, 0).text()
-        reply = QMessageBox.question(self, "Подтверждение", "Удалить выбранный отзыв?",
-                                     QMessageBox.Yes | QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            conn = get_connection()
-            c = conn.cursor()
-            try:
-                c.execute("DELETE FROM review WHERE id = ?", (review_id,))
-                conn.commit()
-                self.load_reviews_to_table()
-                QMessageBox.information(self, "Успех", "Отзыв удален")
-            except Exception as e:
-                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить отзыв: {str(e)}")
             finally:
                 conn.close()
 
@@ -1373,17 +1430,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         self.win = MainWindow()
         self.win.show()
 
-    def load_reviews_to_table(self):
-        conn = get_connection()
-        c = conn.cursor()
-        c.execute('''SELECT id, user_id, product_id, rating, review_text, date 
-                                     FROM review''')
-        data = c.fetchall()
-        conn.close()
-
-        table_widget = self.tableWidget_3
-        self.populate_reviews_table(table_widget, data)
-
     def load_products_to_table(self):
         """Загрузка товаров в таблицу"""
         conn = get_connection()
@@ -1479,25 +1525,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         table_widget.verticalHeader().setVisible(False)
         table_widget.resizeColumnsToContents()
 
-    def populate_reviews_table(self, table_widget, data):
-        if not data:
-            table_widget.setRowCount(0)
-            table_widget.setColumnCount(0)
-            return
-
-        table_widget.setRowCount(len(data))
-        table_widget.setColumnCount(len(data[0]))
-
-        headers = ['ID', 'Пользователь', 'Товар', 'Рейтинг', 'Текст отзыва', 'Дата']
-        table_widget.setHorizontalHeaderLabels(headers)
-
-        for row_num, row_data in enumerate(data):
-            for col_num, cell_data in enumerate(row_data):
-                table_widget.setItem(row_num, col_num, QTableWidgetItem(str(cell_data)))
-
-        table_widget.verticalHeader().setVisible(False)
-        table_widget.resizeColumnsToContents()
-
     def populate_product_table(self, table_widget, data):
         """Заполнение таблицы товаров"""
         if not data:
@@ -1545,13 +1572,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 self.load_orders_to_table()
             elif index == 1:  # Товары
                 self.load_products_to_table()
-            elif index == 2:  # Отзывы
-                self.load_reviews_to_table()
-            elif index == 3:  # Клиенты
+            elif index == 2:  # Клиенты
                 self.load_users_to_table()
-            elif index == 4:  # Сотрудники
+            elif index == 3:  # Сотрудники
                 self.load_employees_to_table()
-            elif index == 5:  # Категории
+            elif index == 4:  # Категории
                 self.load_categories_to_table()
 
         except Exception as e:
@@ -1676,7 +1701,6 @@ class AddProductDialog(QDialog, Ui_AddProductDialog):
             return True
         except ValueError:
             return False
-
 
 class AddOrderWithProductsDialog(QDialog, Ui_AddOrderWithProductsDialog):
     def __init__(self, parent=None):
@@ -1835,87 +1859,6 @@ class AddOrderWithProductsDialog(QDialog, Ui_AddOrderWithProductsDialog):
         finally:
             conn.close()
 
-
-class AddReviewDialog(QDialog, Ui_AddReviewDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-
-        self.pushButton_save.clicked.connect(self.save_review)
-        self.pushButton_cancel.clicked.connect(self.reject)
-
-        self.load_users_from_db()
-        self.load_products_from_db()
-        self.setup_rating_combo()
-
-    def load_users_from_db(self):
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, first_name, last_name FROM user")
-            users = c.fetchall()
-            self.comboBox_user.clear()
-            self.comboBox_user.addItem("")
-            for user in users:
-                self.comboBox_user.addItem(f"{user[1]} {user[2]}", user[0])
-        except Exception as e:
-            print(f"Ошибка загрузки пользователей: {e}")
-        finally:
-            conn.close()
-
-    def load_products_from_db(self):
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, name FROM product")
-            products = c.fetchall()
-            self.comboBox_product.clear()
-            self.comboBox_product.addItem("")
-            for product in products:
-                self.comboBox_product.addItem(product[1], product[0])
-        except Exception as e:
-            print(f"Ошибка загрузки товаров: {e}")
-        finally:
-            conn.close()
-
-    def setup_rating_combo(self):
-        self.comboBox_rating.clear()
-        for i in range(1, 6):
-            self.comboBox_rating.addItem(str(i), i)
-
-    def save_review(self):
-        user_id = self.comboBox_user.currentData()
-        product_id = self.comboBox_product.currentData()
-        rating = self.comboBox_rating.currentData()
-        review_text = self.textEdit_review.toPlainText().strip()
-
-        if not user_id:
-            QMessageBox.warning(self, "Ошибка", "Выберите пользователя")
-            return
-        if not product_id:
-            QMessageBox.warning(self, "Ошибка", "Выберите товар")
-            return
-        if not rating:
-            QMessageBox.warning(self, "Ошибка", "Выберите рейтинг")
-            return
-
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            from datetime import datetime
-            current_date = datetime.now().strftime("%Y-%m-%d")
-
-            c.execute('''INSERT INTO review (user_id, product_id, rating, review_text, date) 
-                        VALUES (?, ?, ?, ?, ?)''',
-                      (user_id, product_id, rating, review_text, current_date))
-            conn.commit()
-            QMessageBox.information(self, "Успех", "Отзыв успешно добавлен")
-            self.accept()
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось добавить отзыв: {str(e)}")
-        finally:
-            conn.close()
-
 class AddUserDialog(QDialog, Ui_AddUserDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1951,7 +1894,6 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось добавить пользователя: {str(e)}")
         finally:
             conn.close()
-
 
 class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
     def __init__(self, parent=None):
@@ -2002,8 +1944,8 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
         name = self.lineEdit_name.text().strip()
         description = self.textEdit_description.toPlainText().strip()
 
-        if not name:
-            QMessageBox.warning(self, "Ошибка", "Введите название категории")
+        if not name or not description:
+            QMessageBox.warning(self, "Ошибка", "Введите данные для добавления категории")
             return
 
         conn = get_connection()
@@ -2020,7 +1962,6 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось добавить категорию: {str(e)}")
         finally:
             conn.close()
-
 
 class EditProductDialog(QDialog, Ui_EditProductDialog):
     def __init__(self, parent=None, product_id=None):
@@ -2083,7 +2024,6 @@ class EditProductDialog(QDialog, Ui_EditProductDialog):
         finally:
             conn.close()
 
-
 class EditUserDialog(QDialog, Ui_EditUserDialog):
     def __init__(self, parent=None, user_id=None):
         super().__init__(parent)
@@ -2101,7 +2041,7 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         c = conn.cursor()
         try:
             c.execute(
-                "SELECT first_name, last_name, third_name, login, password, phone, email, address FROM user WHERE id = ?",
+                "SELECT first_name, last_name, third_name, phone, email, address FROM user WHERE id = ?",
                 (self.user_id,))
             user_data = c.fetchone()
 
@@ -2109,11 +2049,9 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
                 self.lineEdit_first_name.setText(user_data[0] or "")
                 self.lineEdit_last_name.setText(user_data[1] or "")
                 self.lineEdit_third_name.setText(user_data[2] or "")
-                self.lineEdit_login.setText(user_data[3] or "")
-                self.lineEdit_password.setText(user_data[4] or "")
-                self.lineEdit_phone.setText(user_data[5] or "")
-                self.lineEdit_email.setText(user_data[6] or "")
-                self.lineEdit_address.setText(user_data[7] or "")
+                self.lineEdit_phone.setText(user_data[3] or "")
+                self.lineEdit_email.setText(user_data[4] or "")
+                self.lineEdit_address.setText(user_data[5] or "")
 
         except Exception as e:
             print(f"Ошибка загрузки данных пользователя: {e}")
@@ -2125,13 +2063,11 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         first_name = self.lineEdit_first_name.text().strip()
         last_name = self.lineEdit_last_name.text().strip()
         third_name = self.lineEdit_third_name.text().strip()
-        login = self.lineEdit_login.text().strip()
-        password = self.lineEdit_password.text().strip()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
         address = self.lineEdit_address.text().strip()
 
-        if not all([first_name, last_name, login, password, phone, email, address]):
+        if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
             return
 
@@ -2139,9 +2075,9 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         c = conn.cursor()
         try:
             c.execute('''UPDATE user SET first_name=?, last_name=?, third_name=?, 
-                        login=?, password=?, phone=?, email=?, address=?
+                        phone=?, email=?, address=?
                         WHERE id=?''',
-                      (first_name, last_name, third_name, login, password, phone, email, address, self.user_id))
+                      (first_name, last_name, third_name, phone, email, address, self.user_id))
             conn.commit()
             QMessageBox.information(self, "Успех", "Пользователь успешно обновлен")
             self.accept()
@@ -2149,7 +2085,6 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось обновить пользователя: {str(e)}")
         finally:
             conn.close()
-
 
 class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
     def __init__(self, parent=None, employee_id=None):
@@ -2168,7 +2103,7 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         c = conn.cursor()
         try:
             c.execute(
-                "SELECT first_name, last_name, third_name, login, password, phone, email, address FROM employee WHERE id = ?",
+                "SELECT first_name, last_name, third_name, phone, email, address FROM employee WHERE id = ?",
                 (self.employee_id,))
             employee_data = c.fetchone()
 
@@ -2176,11 +2111,9 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
                 self.lineEdit_first_name.setText(employee_data[0] or "")
                 self.lineEdit_last_name.setText(employee_data[1] or "")
                 self.lineEdit_third_name.setText(employee_data[2] or "")
-                self.lineEdit_login.setText(employee_data[3] or "")
-                self.lineEdit_password.setText(employee_data[4] or "")
-                self.lineEdit_phone.setText(employee_data[5] or "")
-                self.lineEdit_email.setText(employee_data[6] or "")
-                self.lineEdit_address.setText(employee_data[7] or "")
+                self.lineEdit_phone.setText(employee_data[3] or "")
+                self.lineEdit_email.setText(employee_data[4] or "")
+                self.lineEdit_address.setText(employee_data[5] or "")
 
         except Exception as e:
             print(f"Ошибка загрузки данных сотрудника: {e}")
@@ -2192,13 +2125,11 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         first_name = self.lineEdit_first_name.text().strip()
         last_name = self.lineEdit_last_name.text().strip()
         third_name = self.lineEdit_third_name.text().strip()
-        login = self.lineEdit_login.text().strip()
-        password = self.lineEdit_password.text().strip()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
         address = self.lineEdit_address.text().strip()
 
-        if not all([first_name, last_name, login, password, phone, email, address]):
+        if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
             return
 
@@ -2206,9 +2137,9 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         c = conn.cursor()
         try:
             c.execute('''UPDATE employee SET first_name=?, last_name=?, third_name=?, 
-                        login=?, password=?, phone=?, email=?, address=?
+                        phone=?, email=?, address=?
                         WHERE id=?''',
-                      (first_name, last_name, third_name, login, password, phone, email, address, self.employee_id))
+                      (first_name, last_name, third_name, phone, email, address, self.employee_id))
             conn.commit()
             QMessageBox.information(self, "Успех", "Сотрудник успешно обновлен")
             self.accept()
@@ -2223,50 +2154,14 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
         super().__init__(parent)
         self.setupUi(self)
         self.order_id = order_id
-        self.selected_products = []  # [position_id, product_id, name, price, quantity]
 
         self.pushButton_save.clicked.connect(self.save_changes)
         self.pushButton_cancel.clicked.connect(self.reject)
-        self.pushButton_add_product.clicked.connect(self.add_product_to_list)
-        self.pushButton_remove_product.clicked.connect(self.remove_selected_product)
 
-        self.load_users_from_db()
-        self.load_products_from_db()
         self.setup_status_combo()
         self.setup_products_table()
 
         self.load_order_data()
-
-    def load_users_from_db(self):
-        """Загружаем пользователей из базы данных"""
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, first_name, last_name FROM user")
-            users = c.fetchall()
-            self.comboBox_user.clear()
-            for user in users:
-                self.comboBox_user.addItem(f"{user[1]} {user[2]}", user[0])
-        except Exception as e:
-            print(f"Ошибка загрузки пользователей: {e}")
-        finally:
-            conn.close()
-
-    def load_products_from_db(self):
-        """Загружаем товары из базы данных"""
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT id, name, price FROM product WHERE price > 0")
-            products = c.fetchall()
-            self.comboBox_product.clear()
-            self.comboBox_product.addItem("")
-            for product in products:
-                self.comboBox_product.addItem(f"{product[1]} - {product[2]} руб.", product[0])
-        except Exception as e:
-            print(f"Ошибка загрузки товаров: {e}")
-        finally:
-            conn.close()
 
     def setup_status_combo(self):
         """Заполняем статусы заказов"""
@@ -2274,10 +2169,10 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
         self.comboBox_status.addItems(["Оформлен", "Доставляется", "Выполнен", "Отменен"])
 
     def setup_products_table(self):
-        """Настраиваем таблицу товаров"""
-        self.tableWidget_products.setColumnCount(5)
-        self.tableWidget_products.setHorizontalHeaderLabels(["ID", "Товар", "Цена", "Количество", "Сумма"])
-        self.tableWidget_products.setColumnHidden(0, True)  # Скрываем ID
+        """Настраиваем таблицу товаров (только для просмотра)"""
+        self.tableWidget_products.setColumnCount(4)
+        self.tableWidget_products.setHorizontalHeaderLabels(["Товар", "Цена", "Количество", "Сумма"])
+        self.tableWidget_products.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)  # Только чтение
 
     def load_order_data(self):
         """Загружаем данные заказа и его товары"""
@@ -2292,12 +2187,17 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
             if order_data:
                 user_id, date, status, total_sum = order_data
 
-                # Устанавливаем пользователя
-                index = self.comboBox_user.findData(user_id)
-                if index >= 0:
-                    self.comboBox_user.setCurrentIndex(index)
+                # Устанавливаем номер заказа
+                self.label_order_id_value.setText(str(self.order_id))
 
-                # Устанавливаем статус
+                # Устанавливаем пользователя (только для просмотра)
+                c.execute('''SELECT first_name, last_name FROM user WHERE id = ?''', (user_id,))
+                user_data = c.fetchone()
+                if user_data:
+                    user_name = f"{user_data[0]} {user_data[1]}"
+                    self.label_user_value.setText(user_name)
+
+                # Устанавливаем статус (для редактирования)
                 index = self.comboBox_status.findText(status)
                 if index >= 0:
                     self.comboBox_status.setCurrentIndex(index)
@@ -2306,207 +2206,64 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
                 self.label_date_value.setText(date)
                 self.label_total_value.setText(f"{total_sum:.2f} руб.")
 
-            # Загружаем товары в заказе
-            c.execute('''SELECT op.id, op.product_id, p.name, p.price, op.quantity, op.price_at_time
+            # Загружаем товары в заказе (только для просмотра)
+            c.execute('''SELECT p.name, op.price_at_time, op.quantity
                          FROM order_position op
                          JOIN product p ON op.product_id = p.id
                          WHERE op.order_id = ?''', (self.order_id,))
             order_products = c.fetchall()
 
-            self.selected_products = []
-            for product in order_products:
-                position_id, product_id, name, current_price, quantity, price_at_time = product
-                # Используем цену на момент заказа (price_at_time)
-                self.selected_products.append([position_id, product_id, name, price_at_time, quantity])
-
-            self.update_products_table()
+            self.display_order_products(order_products)
 
         except Exception as e:
             print(f"Ошибка загрузки данных заказа: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить данные заказа: {str(e)}")
         finally:
             conn.close()
 
-    def add_product_to_list(self):
-        """Добавляем выбранный товар в список"""
-        product_index = self.comboBox_product.currentIndex()
-        if product_index == 0:  # Пустой элемент
-            QMessageBox.warning(self, "Ошибка", "Выберите товар")
-            return
+    def display_order_products(self, order_products):
+        """Отображаем товары заказа в таблице (только для просмотра)"""
+        self.tableWidget_products.setRowCount(len(order_products))
 
-        product_id = self.comboBox_product.currentData()
-        product_text = self.comboBox_product.currentText()
-        quantity = self.spinBox_quantity.value()
-
-        # Извлекаем название и цену из текста
-        product_parts = product_text.split(" - ")
-        product_name = product_parts[0]
-        price = float(product_parts[1].replace(" руб.", ""))
-
-        # Проверяем, не добавлен ли уже этот товар
-        for i, item in enumerate(self.selected_products):
-            if item[1] == product_id:  # Сравниваем по product_id
-                # Увеличиваем количество
-                self.selected_products[i][4] += quantity
-                self.update_products_table()
-                return
-
-        # Добавляем новый товар (position_id = None для новых товаров)
-        self.selected_products.append([None, product_id, product_name, price, quantity])
-        self.update_products_table()
-
-    def remove_selected_product(self):
-        """Удаляем выбранный товар из списка"""
-        current_row = self.tableWidget_products.currentRow()
-        if current_row == -1:
-            QMessageBox.warning(self, "Ошибка", "Выберите товар для удаления")
-            return
-
-        # Удаляем из списка
-        del self.selected_products[current_row]
-        self.update_products_table()
-
-    def update_products_table(self):
-        """Обновляем таблицу товаров и пересчитываем сумму"""
-        self.tableWidget_products.setRowCount(len(self.selected_products))
-
-        total_sum = 0
-
-        for row, product in enumerate(self.selected_products):
-            position_id, product_id, name, price, quantity = product
+        for row, product in enumerate(order_products):
+            name, price, quantity = product
             sum_price = price * quantity
-            total_sum += sum_price
 
-            # ID позиции (скрыто)
-            self.tableWidget_products.setItem(row, 0, QTableWidgetItem(str(position_id) if position_id else "Новый"))
             # Товар
-            self.tableWidget_products.setItem(row, 1, QTableWidgetItem(name))
+            self.tableWidget_products.setItem(row, 0, QTableWidgetItem(name))
             # Цена
-            self.tableWidget_products.setItem(row, 2, QTableWidgetItem(f"{price:.2f}"))
+            self.tableWidget_products.setItem(row, 1, QTableWidgetItem(f"{price:.2f}"))
             # Количество
-            self.tableWidget_products.setItem(row, 3, QTableWidgetItem(str(quantity)))
+            self.tableWidget_products.setItem(row, 2, QTableWidgetItem(str(quantity)))
             # Сумма
-            self.tableWidget_products.setItem(row, 4, QTableWidgetItem(f"{sum_price:.2f}"))
+            self.tableWidget_products.setItem(row, 3, QTableWidgetItem(f"{sum_price:.2f}"))
 
-        # Обновляем итоговую сумму
-        self.label_total_value.setText(f"{total_sum:.2f} руб.")
+        # Автоподбор ширины столбцов
         self.tableWidget_products.resizeColumnsToContents()
 
     def save_changes(self):
-        """Сохраняем изменения в заказе"""
-        user_id = self.comboBox_user.currentData()
+        """Сохраняем изменения статуса заказа"""
         status = self.comboBox_status.currentText()
 
-        if not user_id:
-            QMessageBox.warning(self, "Ошибка", "Выберите пользователя")
+        if not status:
+            QMessageBox.warning(self, "Ошибка", "Выберите статус заказа")
             return
-
-        if not self.selected_products:
-            QMessageBox.warning(self, "Ошибка", "В заказе должен быть хотя бы один товар")
-            return
-
-        # Рассчитываем новую итоговую сумму
-        total_sum = sum(product[3] * product[4] for product in self.selected_products)
 
         conn = get_connection()
         c = conn.cursor()
         try:
-            # Обновляем основную информацию о заказе
-            c.execute('''UPDATE user_order SET user_id=?, status=?, sum=?
+            # Обновляем только статус заказа
+            c.execute('''UPDATE user_order SET status=?
                         WHERE id=?''',
-                      (user_id, status, total_sum, self.order_id))
-
-            # Удаляем старые позиции заказа
-            c.execute("DELETE FROM order_position WHERE order_id = ?", (self.order_id,))
-
-            # Добавляем новые/обновленные позиции
-            for product in self.selected_products:
-                position_id, product_id, name, price, quantity = product
-                c.execute('''INSERT INTO order_position (order_id, product_id, quantity, price_at_time) 
-                            VALUES (?, ?, ?, ?)''',
-                          (self.order_id, product_id, quantity, price))
+                      (status, self.order_id))
 
             conn.commit()
-            QMessageBox.information(self, "Успех", "Заказ успешно обновлен")
+            QMessageBox.information(self, "Успех", "Статус заказа успешно обновлен")
             self.accept()
 
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить заказ: {str(e)}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить статус заказа: {str(e)}")
             conn.rollback()
-        finally:
-            conn.close()
-
-
-class EditReviewDialog(QDialog, Ui_EditReviewDialog):
-    def __init__(self, parent=None, review_id=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        self.review_id = review_id
-
-        self.pushButton_save.clicked.connect(self.save_changes)
-        self.pushButton_cancel.clicked.connect(self.reject)
-
-        self.setup_rating_combo()
-        self.load_review_data()
-
-    def setup_rating_combo(self):
-        """Заполняем рейтинги"""
-        self.comboBox_rating.clear()
-        for i in range(1, 6):
-            self.comboBox_rating.addItem(str(i), i)
-
-    def load_review_data(self):
-        """Загружаем данные отзыва"""
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute("SELECT user_id, product_id, rating, review_text FROM review WHERE id = ?", (self.review_id,))
-            review_data = c.fetchone()
-
-            if review_data:
-                self.lineEdit_user_id.setText(str(review_data[0]) if review_data[0] else "")
-                self.lineEdit_product_id.setText(str(review_data[1]) if review_data[1] else "")
-
-                # Устанавливаем рейтинг
-                index = self.comboBox_rating.findData(review_data[2])
-                if index >= 0:
-                    self.comboBox_rating.setCurrentIndex(index)
-
-                self.textEdit_review_text.setPlainText(review_data[3] or "")
-
-        except Exception as e:
-            print(f"Ошибка загрузки данных отзыва: {e}")
-        finally:
-            conn.close()
-
-    def save_changes(self):
-        """Сохраняем изменения"""
-        user_id = self.lineEdit_user_id.text().strip()
-        product_id = self.lineEdit_product_id.text().strip()
-        rating = self.comboBox_rating.currentData()
-        review_text = self.textEdit_review_text.toPlainText().strip()
-
-        if not all([user_id, product_id, rating]):
-            QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
-            return
-
-        try:
-            int(user_id)
-            int(product_id)
-        except ValueError:
-            QMessageBox.warning(self, "Ошибка", "ID пользователя и ID товара должны быть числами")
-            return
-
-        conn = get_connection()
-        c = conn.cursor()
-        try:
-            c.execute('''UPDATE review SET user_id=?, product_id=?, rating=?, review_text=?
-                        WHERE id=?''',
-                      (int(user_id), int(product_id), rating, review_text, self.review_id))
-            conn.commit()
-            QMessageBox.information(self, "Успех", "Отзыв успешно обновлен")
-            self.accept()
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить отзыв: {str(e)}")
         finally:
             conn.close()
 

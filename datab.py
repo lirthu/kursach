@@ -8,7 +8,7 @@ c.execute('''
 CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(20) NOT NULL UNIQUE,
-    description TEXT)
+    description TEXT NOT NULL)
 ''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS product (
@@ -54,17 +54,6 @@ CREATE TABLE IF NOT EXISTS order_position (
 )
 ''')
 c.execute('''
-CREATE TABLE IF NOT EXISTS review (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    product_id INTEGER NOT NULL,
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    review_text TEXT,
-    date TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (product_id) REFERENCES product (id))
-''')
-c.execute('''
 CREATE TABLE IF NOT EXISTS employee (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     first_name VARCHAR(100) NOT NULL,
@@ -75,17 +64,6 @@ CREATE TABLE IF NOT EXISTS employee (
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(150) NOT NULL,
     address TEXT NOT NULL)
-''')
-c.execute('''
-CREATE TABLE IF NOT EXISTS application (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    employee_id INTEGER NOT NULL,
-    status TEXT CHECK(status IN ('Новая', 'В обработке', 'Выполнена', 'Отклонена')) DEFAULT 'Новая',
-    date DATE NOT NULL,
-    description TEXT,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (employee_id) REFERENCES employee (id))
 ''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS cart (
@@ -110,7 +88,7 @@ c.execute('''SELECT * FROM cart''')
 res = c.fetchall()
 for r in res:
     print(dict(r))
-c.execute('''SELECT * FROM cart_item''')
+c.execute('''SELECT * FROM category''')
 res1 = c.fetchall()
 for t in res1:
     print(dict(t))

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Корзина</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -20,28 +20,18 @@
       <number>30</number>
      </property>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
          <family>Segoe Print</family>
          <pointsize>16</pointsize>
-         <underline>false</underline>
         </font>
        </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Каталог</string>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>48</width>
-         <height>48</height>
-        </size>
+        <string>Корзина</string>
        </property>
       </widget>
      </item>
@@ -57,7 +47,7 @@
         <cursorShape>ArrowCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Поиск:</string>
+        <string>Поиск</string>
        </property>
       </widget>
      </item>
@@ -189,12 +179,22 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <property name="leftMargin">
-      <number>750</number>
-     </property>
      <property name="rightMargin">
       <number>20</number>
      </property>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item>
       <widget class="QLabel" name="label_2">
        <property name="font">
@@ -255,7 +255,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,0">
      <property name="spacing">
       <number>20</number>
      </property>
@@ -290,6 +290,19 @@
         </size>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_6">
