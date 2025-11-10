@@ -16,7 +16,7 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,9">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
@@ -154,7 +154,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,9">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,5">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0,0,0,0">
        <property name="spacing">
@@ -306,7 +306,21 @@ QComboBox QAbstractItemView {
       </layout>
      </item>
      <item>
-      <widget class="QWidget" name="widget" native="true"/>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>857</width>
+          <height>634</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </item>
     </layout>
    </item>

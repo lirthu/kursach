@@ -167,26 +167,27 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
         self.showMaximized()
 
-        # Получаем ссылку на widget для отображения товаров
-        self.products_widget = self.widget
-        self.products_layout = QtWidgets.QVBoxLayout(self.products_widget)
-        self.products_widget.setLayout(self.products_layout)
+        # Получаем ссылку на содержимое scrollArea
+        self.scroll_content = self.scrollAreaWidgetContents
+
+        # Создаем layout для содержимого scrollArea
+        self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_content)
+        self.scroll_content.setLayout(self.scroll_layout)
 
         menu_manager = MenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_2.clicked.connect(self.open_cart_window)
 
-        self.load_products()
+        # Подключаем кнопки фильтров
+        self.pushButton_5.clicked.connect(self.apply_filters)
+        self.pushButton_6.clicked.connect(self.reset_filters)
+        self.comboBox_3.currentIndexChanged.connect(self.apply_sorting)
 
-    def open_cart_window(self):
-        self.close()
-        self.win = ShoppingCart(self.user_id)
-        self.win.show()
+        self.load_products()
 
     def load_products(self):
         """Загрузка товаров из базы данных"""
         try:
-            # Очищаем виджет перед загрузкой новых товаров
             conn = get_connection()
             c = conn.cursor()
             c.execute('''SELECT id, name, brand, description, price, image_path 
@@ -200,22 +201,33 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             print(f"Ошибка загрузки товаров: {e}")
 
     def display_products(self, products):
-        """Отображение товаров в виде карточек"""
-        # Очищаем предыдущие карточки
+        """Отображение товаров в scrollArea"""
+        # Полностью очищаем содержимое scrollArea
+        for i in reversed(range(self.scroll_layout.count())):
+            item = self.scroll_layout.itemAt(i)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                # Если есть вложенные layout, удаляем их виджеты
+                self.clear_layout(item.layout())
+
+        # Если товаров нет, показываем сообщение
         if not products:
-            # Если товаров нет, показываем сообщение
             no_products_label = QtWidgets.QLabel("Товары не найдены")
             no_products_label.setAlignment(QtCore.Qt.AlignCenter)
             no_products_label.setStyleSheet("font-size: 16px; color: gray; font-family: 'Segoe Print';")
-            self.products_layout.addWidget(no_products_label)
+            self.scroll_layout.addWidget(no_products_label)
             return
 
-        # Создаем сетку для карточек (3 колонки)
-        grid_layout = QtWidgets.QGridLayout()
-        grid_layout.setSpacing(25)  # Увеличил расстояние между карточками
+        # Создаем контейнер для сетки карточек
+        products_container = QtWidgets.QWidget()
+        products_layout = QtWidgets.QGridLayout(products_container)
+        products_layout.setSpacing(20)
+        products_layout.setContentsMargins(10, 10, 10, 10)
 
         row = 0
         col = 0
+        max_columns = 4  # Максимальное количество колонок
 
         for product in products:
             product_id, name, brand, description, price, image_path = product
@@ -224,26 +236,116 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             card = self.create_product_card(product_id, name, brand, price, image_path, description)
 
             # Добавляем в сетку
-            grid_layout.addWidget(card, row, col)
+            products_layout.addWidget(card, row, col)
 
             # Переходим к следующей ячейке
             col += 1
-            if col >= 7:  # 3 колонки
+            if col >= max_columns:
                 col = 0
                 row += 1
 
-        # Добавляем сетку в основной layout
-        self.products_layout.addLayout(grid_layout)
+        # Добавляем контейнер в scroll layout
+        self.scroll_layout.addWidget(products_container)
 
-        # Добавляем растягивающийся элемент чтобы карточки были вверху
-        self.products_layout.addStretch(1)
+    def clear_layout(self, layout):
+        """Рекурсивно очищает layout и удаляет все виджеты"""
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+                else:
+                    self.clear_layout(item.layout())
+
+    def apply_filters(self):
+        """Применение фильтров по цене и сортировки"""
+        try:
+            min_price = self.lineEdit_2.text().strip()
+            max_price = self.lineEdit_3.text().strip()
+            sort_index = self.comboBox_3.currentIndex()
+
+            query = '''SELECT id, name, brand, description, price, image_path 
+                       FROM product WHERE 1=1'''
+            params = []
+
+            # Фильтр по цене
+            if min_price:
+                query += " AND price >= ?"
+                params.append(float(min_price))
+
+            if max_price:
+                query += " AND price <= ?"
+                params.append(float(max_price))
+
+            # Сортировка
+            if sort_index == 1:  # "От А до Я"
+                query += " ORDER BY name ASC"
+            elif sort_index == 2:  # "От Я до А"
+                query += " ORDER BY name DESC"
+            elif sort_index == 3:  # "По возрастанию цены"
+                query += " ORDER BY price ASC"
+            elif sort_index == 4:  # "По убыванию цены"
+                query += " ORDER BY price DESC"
+
+            conn = get_connection()
+            c = conn.cursor()
+            c.execute(query, params)
+            filtered_products = c.fetchall()
+            conn.close()
+
+            self.display_products(filtered_products)
+
+        except ValueError:
+            QMessageBox.warning(self, "Ошибка", "Введите корректные значения цены")
+        except Exception as e:
+            print(f"Ошибка применения фильтров: {e}")
+
+    def reset_filters(self):
+        """Сброс фильтров"""
+        self.lineEdit_2.clear()
+        self.lineEdit_3.clear()
+        self.lineEdit.clear()
+        self.comboBox_3.setCurrentIndex(0)
+        self.load_products()
+
+    def apply_sorting(self, index):
+        """Применение сортировки"""
+        if index == 0:  # "Сортировать" - без сортировки
+            self.load_products()
+            return
+
+        try:
+            conn = get_connection()
+            c = conn.cursor()
+
+            if index == 1:  # "От А до Я"
+                c.execute('''SELECT id, name, brand, description, price, image_path 
+                             FROM product ORDER BY name ASC''')
+            elif index == 2:  # "От Я до А"
+                c.execute('''SELECT id, name, brand, description, price, image_path 
+                             FROM product ORDER BY name DESC''')
+            elif index == 3:  # "По возрастанию цены"
+                c.execute('''SELECT id, name, brand, description, price, image_path 
+                             FROM product ORDER BY price ASC''')
+            elif index == 4:  # "По убыванию цены"
+                c.execute('''SELECT id, name, brand, description, price, image_path 
+                             FROM product ORDER BY price DESC''')
+
+            sorted_products = c.fetchall()
+            conn.close()
+
+            self.display_products(sorted_products)
+
+        except Exception as e:
+            print(f"Ошибка сортировки товаров: {e}")
 
     def create_product_card(self, product_id, name, brand, price, image_path, description):
         """Создание карточки товара"""
         # Основная карточка
         card = QtWidgets.QGroupBox()
-        card.setMinimumSize(200, 320)  # Увеличил минимальную высоту
-        card.setMaximumSize(220, 400)  # Увеличил максимальную высоту
+        card.setMinimumSize(200, 320)
+        card.setMaximumSize(250, 400)
         card.setStyleSheet("""
             QGroupBox {
                 border: 2px solid #cccccc;
@@ -258,12 +360,12 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         """)
 
         layout = QtWidgets.QVBoxLayout(card)
-        layout.setSpacing(6)  # Уменьшил расстояние между элементами
-        layout.setContentsMargins(8, 8, 8, 8)  # Уменьшил отступы
+        layout.setSpacing(6)
+        layout.setContentsMargins(8, 8, 8, 8)
 
-        # Изображение товара - фиксированная высота
+        # Изображение товара
         image_label = QtWidgets.QLabel()
-        image_label.setFixedSize(150, 150)  # Фиксированный размер вместо min/max
+        image_label.setFixedSize(150, 150)
         image_label.setAlignment(QtCore.Qt.AlignCenter)
         image_label.setStyleSheet("""
             QLabel {
@@ -277,7 +379,6 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             try:
                 pixmap = QtGui.QPixmap(image_path)
                 if not pixmap.isNull():
-                    # Масштабируем изображение
                     scaled_pixmap = pixmap.scaled(140, 140, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                     image_label.setPixmap(scaled_pixmap)
                 else:
@@ -291,10 +392,10 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             image_label.setText("Нет\nизображения")
             image_label.setStyleSheet("color: gray; font-size: 10px; font-family: 'Segoe Print';")
 
-        # Название товара - ограничиваем высоту
+        # Название товара
         name_label = QtWidgets.QLabel(name)
         name_label.setWordWrap(True)
-        name_label.setMaximumHeight(40)  # Ограничиваем высоту названия
+        name_label.setMaximumHeight(40)
         name_label.setAlignment(QtCore.Qt.AlignCenter)
         name_label.setStyleSheet("""
             font-weight: bold; 
@@ -305,7 +406,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         # Бренд
         brand_label = QtWidgets.QLabel(brand if brand else "Бренд не указан")
-        brand_label.setMaximumHeight(20)  # Ограничиваем высоту
+        brand_label.setMaximumHeight(20)
         brand_label.setAlignment(QtCore.Qt.AlignCenter)
         brand_label.setStyleSheet("""
             color: #666666; 
@@ -315,7 +416,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         # Цена
         price_label = QtWidgets.QLabel(f"{float(price):.2f} руб.")
-        price_label.setMaximumHeight(25)  # Ограничиваем высоту
+        price_label.setMaximumHeight(25)
         price_label.setAlignment(QtCore.Qt.AlignCenter)
         price_label.setStyleSheet("""
             font-weight: bold; 
@@ -332,7 +433,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         # Кнопка "В корзину"
         cart_button = QtWidgets.QPushButton("В корзину")
-        cart_button.setMinimumHeight(30)  # Фиксированная высота кнопки
+        cart_button.setMinimumHeight(30)
         cart_button.setStyleSheet("""
             QPushButton {
                 background-color: #f0f0f0;
@@ -355,7 +456,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         # Кнопка "Подробнее"
         details_button = QtWidgets.QPushButton("Подробнее")
-        details_button.setMinimumHeight(30)  # Фиксированная высота кнопки
+        details_button.setMinimumHeight(30)
         details_button.setStyleSheet("""
             QPushButton {
                 background-color: #f0f0f0;
@@ -440,13 +541,11 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             conn = get_connection()
             c = conn.cursor()
 
-            # Получаем основную информацию о товаре
             c.execute('''SELECT name, brand, description, price, image_path 
                          FROM product WHERE id = ?''', (product_id,))
             product = c.fetchone()
 
             if product:
-                # Правильное обращение к данным через индексы
                 name = product[0] if product[0] else ""
                 brand = product[1] if product[1] else ""
                 description = product[2] if product[2] else ""
@@ -512,6 +611,11 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         except Exception as e:
             print(f"Ошибка показа деталей товара: {e}")
+
+    def open_cart_window(self):
+        self.close()
+        self.win = ShoppingCart(self.user_id)
+        self.win.show()
 
 class ProfileWin(QDialog, Ui_Profile_Form):
     def __init__(self, user_id = None, user_type = 'user'):
