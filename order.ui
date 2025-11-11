@@ -68,7 +68,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../../Downloads/pngwing.com (1).png</normaloff>../../Downloads/pngwing.com (1).png</iconset>
+         <normaloff>корзина.png</normaloff>корзина.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -95,7 +95,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../../Downloads/pngwing.com (2).png</normaloff>../../Downloads/pngwing.com (2).png</iconset>
+         <normaloff>профиль.png</normaloff>профиль.png</iconset>
        </property>
        <property name="iconSize">
         <size>
