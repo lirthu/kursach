@@ -138,4 +138,5 @@ class Ui_Profile_Form(object):
         self.label_12.setText(_translate("Form", "Телефон"))
         self.label_13.setText(_translate("Form", "Email"))
         self.label_14.setText(_translate("Form", "Адрес"))
+        self.lineEdit_5.setPlaceholderText(_translate("Form", "Введите новый пароль"))
         self.pushButton.setText(_translate("Form", "Сохранить данные"))

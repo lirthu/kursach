@@ -110,35 +110,45 @@ class Ui_Reg_Form(object):
         self.checkBox.setObjectName("checkBox")
         self.horizontalLayout.addWidget(self.checkBox)
         self.gridLayout.addLayout(self.horizontalLayout, 10, 2, 1, 1)
-        self.lineEdit_3 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_3.setObjectName("lineEdit_3")
-        self.gridLayout.addWidget(self.lineEdit_3, 4, 2, 1, 1)
-        self.lineEdit_2 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.gridLayout.addWidget(self.lineEdit_2, 3, 2, 1, 1)
-        self.lineEdit_1 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_1.setObjectName("lineEdit_1")
-        self.gridLayout.addWidget(self.lineEdit_1, 2, 2, 1, 1)
+
         self.lineEdit = QtWidgets.QLineEdit(Form)
         self.lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(self.lineEdit, 1, 2, 1, 1)
+
+        self.lineEdit_1 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_1.setObjectName("lineEdit_1")
+        self.gridLayout.addWidget(self.lineEdit_1, 2, 2, 1, 1)
+
+        self.lineEdit_2 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.gridLayout.addWidget(self.lineEdit_2, 3, 2, 1, 1)
+
+        self.lineEdit_3 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.gridLayout.addWidget(self.lineEdit_3, 4, 2, 1, 1)
+
         self.lineEdit_4 = QtWidgets.QLineEdit(Form)
         self.lineEdit_4.setObjectName("lineEdit_4")
         self.gridLayout.addWidget(self.lineEdit_4, 5, 2, 1, 1)
+
         self.lineEdit_9 = QtWidgets.QLineEdit(Form)
         self.lineEdit_9.setObjectName("lineEdit_9")
         self.gridLayout.addWidget(self.lineEdit_9, 6, 2, 1, 1)
+
         self.lineEdit_10 = QtWidgets.QLineEdit(Form)
         self.lineEdit_10.setObjectName("lineEdit_10")
         self.gridLayout.addWidget(self.lineEdit_10, 7, 2, 1, 1)
+
         self.lineEdit_11 = QtWidgets.QLineEdit(Form)
         self.lineEdit_11.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_11.setObjectName("lineEdit_11")
         self.gridLayout.addWidget(self.lineEdit_11, 8, 2, 1, 1)
+
         self.lineEdit_12 = QtWidgets.QLineEdit(Form)
         self.lineEdit_12.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_12.setObjectName("lineEdit_12")
         self.gridLayout.addWidget(self.lineEdit_12, 9, 2, 1, 1)
+
         self.verticalLayout.addLayout(self.gridLayout)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setContentsMargins(155, -1, 133, -1)

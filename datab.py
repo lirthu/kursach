@@ -1,4 +1,5 @@
 import sqlite3
+import hashlib
 
 connect = sqlite3.connect('database.db')
 c = connect.cursor()
@@ -81,14 +82,29 @@ CREATE TABLE IF NOT EXISTS cart_item (
     FOREIGN KEY (cart_id) REFERENCES cart (id),
     FOREIGN KEY (product_id) REFERENCES product (id))
 ''')
-c.execute('''INSERT OR IGNORE INTO employee 
+password = "1234"
+hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+c.execute('''DELETE FROM employee WHERE login = "admin"''')
+
+c.execute('''INSERT INTO employee
     (first_name, last_name, third_name, login, password, phone, email, address)
-    VALUES ('Ваня','Петров','Иванович','admin','1234','+79990000000','admin@example.com','адрес')''')
-c.execute('''SELECT * FROM cart''')
+    VALUES ('Ваня','Пeтров','Иванович','admin',?,'+79990000000','admin@example.com','адрес')''',
+    (hashed_password,))
+# c.execute('''DELETE FROM user''')
+# c.execute('''DELETE FROM employee''')
+# c.execute('''DELETE FROM user_order''')
+# c.execute('''DELETE FROM order_position''')
+# c.execute('''DELETE FROM cart''')
+# c.execute('''DELETE FROM cart_item''')
+# c.execute('''DELETE FROM category''')
+# c.execute('''DELETE FROM product''')
+
+c.execute('''SELECT * FROM user''')
 res = c.fetchall()
 for r in res:
     print(dict(r))
-c.execute('''SELECT * FROM category''')
+c.execute('''SELECT * FROM employee''')
 res1 = c.fetchall()
 for t in res1:
     print(dict(t))

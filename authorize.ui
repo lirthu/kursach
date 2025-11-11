@@ -177,7 +177,7 @@
         <cursorShape>ArrowCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Нет акаунта?</string>
+        <string>Нет аккаунта?</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

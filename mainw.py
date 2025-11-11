@@ -1,6 +1,8 @@
 import os
 import sys
 import sqlite3
+import hashlib
+import secrets
 
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QTableWidgetItem, QMenu
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -22,6 +24,11 @@ from edit_product_dialog import Ui_EditProductDialog
 from edit_user_dialog import Ui_EditUserDialog
 from edit_category_dialog import Ui_EditCategoryDialog
 from edit_employee_dialog import Ui_EditEmployeeDialog
+from order_contents_dialog import Ui_OrderContentsDialog
+
+def hash_password(password: str) -> str:
+    hashed = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return hashed
 
 def get_connection():
     connect = sqlite3.connect('database.db')
@@ -49,16 +56,18 @@ class MainWindow(QDialog, Ui_Auth_Form):
             self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
 
     def clicked_login(self):
-        connect  = get_connection()
+        connect = get_connection()
         c = connect.cursor()
         login = self.lineEdit.text()
         password = self.lineEdit_2.text()
 
-        if not login or not password:
+        hashed_password = hash_password(password)
+
+        if (not login) or (not hashed_password):
             QMessageBox.warning(self, "Ошибка", "Введите все данные!")
             return
 
-        c.execute('''SELECT id FROM user WHERE login = ? AND password = ?''', (login, password))
+        c.execute('''SELECT id FROM user WHERE login = ? AND password = ?''', (login, hashed_password))
         result = c.fetchone()
 
         if result:
@@ -66,7 +75,7 @@ class MainWindow(QDialog, Ui_Auth_Form):
             self.open_main_catalog()
             return
 
-        c.execute('''SELECT id FROM employee WHERE login = ? AND password = ?''', (login, password))
+        c.execute('''SELECT id FROM employee WHERE login = ? AND password = ?''', (login, hashed_password))
         result = c.fetchone()
 
         if result:
@@ -94,8 +103,10 @@ class MainWindow(QDialog, Ui_Auth_Form):
 class RegisterWin(QDialog, Ui_Reg_Form):
     def __init__(self):
         super().__init__()
-
         self.setupUi(self)
+
+        self.lineEdit_3.setInputMask("+7 (000) 000-00-00")
+
         self.pushButton.clicked.connect(self.registration)
         self.pushButton_2.clicked.connect(self.open_main_window_return)
         self.checkBox.stateChanged.connect(self.toggle_password_visibility)
@@ -115,8 +126,8 @@ class RegisterWin(QDialog, Ui_Reg_Form):
         connect = get_connection()
         c = connect.cursor()
         try:
-            name = self.lineEdit_1.text().strip()
             last_name = self.lineEdit.text().strip()
+            name = self.lineEdit_1.text().strip()
             third_name = self.lineEdit_2.text().strip()
             login = self.lineEdit_10.text().strip()
             password = self.lineEdit_11.text().strip()
@@ -125,15 +136,45 @@ class RegisterWin(QDialog, Ui_Reg_Form):
             email = self.lineEdit_9.text().strip()
             address = self.lineEdit_4.text().strip()
 
-            if not name or not last_name or not login or not password or not return_password:
+            if not name or not last_name or not login or not password or not return_password or not phone or not email or not address:
                 QMessageBox.warning(self, "Внимание", "Заполните все поля.")
+                return
+                # проверка на ввод числа и фильтр только по цифрам и объединения их в единое целое
+            phone_digits = ''.join(filter(str.isdigit, phone))
+            if len(phone_digits) != 11 or '_' in phone:
+                QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+                self.lineEdit_3.setFocus()
+                return
+            if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+                QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+                self.lineEdit_9.setFocus()
                 return
             if password != return_password:
                 QMessageBox.critical(self, "Ошибка", "Пароли не совпадают.")
                 return
 
+            c.execute('SELECT id FROM user WHERE login = ?', (login,))
+            existing_user = c.fetchone()
+            if existing_user:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с таким логином уже существует. Выберите другой логин.")
+                self.lineEdit_10.setFocus()
+                self.lineEdit_10.selectAll()
+                return
+
+            c.execute('SELECT id FROM employee WHERE login = ?', (login,))
+            existing_user = c.fetchone()
+            if existing_user:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с таким логином уже существует. Выберите другой логин.")
+                self.lineEdit_10.setFocus()
+                self.lineEdit_10.selectAll()
+                return
+
+            hashed_password = hash_password(password)
+
             c.execute('''INSERT INTO user (first_name, last_name, third_name, login, password, phone, email, address) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', (name, last_name, third_name, login, password, email, phone, address))
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', (name, last_name, third_name, login, hashed_password, phone, email, address))
 
             connect.commit()
             self.open_main_window(login)
@@ -167,8 +208,8 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
         self.showMaximized()
 
-        # Получаем ссылку на содержимое scrollArea
-        self.scroll_content = self.scrollAreaWidgetContents
+        # ИСПРАВЛЕНИЕ: Используем правильное имя содержимого scrollArea
+        self.scroll_content = self.scrollAreaWidgetContents_2
 
         # Создаем layout для содержимого scrollArea
         self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_content)
@@ -178,20 +219,92 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_2.clicked.connect(self.open_cart_window)
 
-        # Подключаем кнопки фильтров
-        self.pushButton_5.clicked.connect(self.apply_filters)
-        self.pushButton_6.clicked.connect(self.reset_filters)
-        self.comboBox_3.currentIndexChanged.connect(self.apply_sorting)
+        # Подключаем кнопки фильтров (ИСПРАВЛЕНИЕ: правильные имена кнопок)
+        self.pushButton_7.clicked.connect(self.apply_filters)
+        self.pushButton_8.clicked.connect(self.reset_filters)
+
+        self.pushButton_3.clicked.connect(self.search_products)
+        self.lineEdit.returnPressed.connect(self.search_products)
+        self.current_search_query = ""
 
         self.load_products()
 
+    def search_products(self):
+        """Поиск товаров по названию и описанию"""
+        search_query = self.lineEdit.text().strip().capitalize()
+        self.current_search_query = search_query
+
+        # Если запрос пустой, загружаем все товары
+        if not search_query:
+            self.load_products()
+            return
+
+        self.apply_filters()
+
+    def apply_filters(self):
+        """Применение фильтров по цене, сортировки и поиска"""
+        try:
+            min_price = self.lineEdit_3.text().strip()
+            max_price = self.lineEdit_4.text().strip()
+            sort_index = self.comboBox_3.currentIndex()
+            search_query = self.current_search_query
+
+            query = '''SELECT id, name, brand, description, price, image_path 
+                       FROM product WHERE 1=1'''
+            params = []
+
+            # Фильтр по поисковому запросу
+            if search_query:
+                query += " AND (name LIKE ? OR description LIKE ? OR brand LIKE ?)"
+                search_pattern = f'%{search_query}%'
+                params.extend([search_pattern, search_pattern, search_pattern])
+
+            # Фильтр по цене
+            if min_price:
+                query += " AND price >= ?"
+                params.append(float(min_price))
+
+            if max_price:
+                query += " AND price <= ?"
+                params.append(float(max_price))
+
+            # Сортировка
+            if sort_index == 1:  # "От А до Я"
+                query += " ORDER BY name ASC"
+            elif sort_index == 2:  # "От Я до А"
+                query += " ORDER BY name DESC"
+            else:  # По умолчанию - по ID
+                query += " ORDER BY id ASC"
+
+            conn = get_connection()
+            c = conn.cursor()
+            c.execute(query, params)
+            filtered_products = c.fetchall()
+            conn.close()
+
+            self.display_products(filtered_products)
+
+        except ValueError:
+            QMessageBox.warning(self, "Ошибка", "Введите корректные значения цены")
+        except Exception as e:
+            print(f"Ошибка применения фильтров: {e}")
+
+    def reset_filters(self):
+        """Сброс фильтров и поиска"""
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit.clear()  # Очищаем поле поиска
+        self.current_search_query = ""  # Сбрасываем поисковый запрос
+        self.comboBox_3.setCurrentIndex(0)
+        self.load_products()
+
     def load_products(self):
-        """Загрузка товаров из базы данных"""
+        """Загрузка всех товаров из базы данных"""
         try:
             conn = get_connection()
             c = conn.cursor()
             c.execute('''SELECT id, name, brand, description, price, image_path 
-                         FROM product''')
+                         FROM product ORDER BY id ASC''')
             products = c.fetchall()
             conn.close()
 
@@ -201,7 +314,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             print(f"Ошибка загрузки товаров: {e}")
 
     def display_products(self, products):
-        """Отображение товаров в scrollArea"""
+        """Отображение товаров в scrollArea с равномерным заполнением экрана"""
         # Полностью очищаем содержимое scrollArea
         for i in reversed(range(self.scroll_layout.count())):
             item = self.scroll_layout.itemAt(i)
@@ -222,12 +335,20 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         # Создаем контейнер для сетки карточек
         products_container = QtWidgets.QWidget()
         products_layout = QtWidgets.QGridLayout(products_container)
-        products_layout.setSpacing(20)
-        products_layout.setContentsMargins(10, 10, 10, 10)
+        products_layout.setSpacing(20)  # Расстояние между карточками
+        products_layout.setContentsMargins(20, 20, 20, 20)  # Отступы от краев
+
+        # Определяем оптимальное количество колонок в зависимости от ширины экрана
+        screen_width = QApplication.desktop().screenGeometry().width()
+        if screen_width >= 1920:  # Full HD и выше
+            max_columns = 6
+        elif screen_width >= 1366:  # HD
+            max_columns = 4
+        else:  # Меньшие разрешения
+            max_columns = 3
 
         row = 0
         col = 0
-        max_columns = 4  # Максимальное количество колонок
 
         for product in products:
             product_id, name, brand, description, price, image_path = product
@@ -244,6 +365,15 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
                 col = 0
                 row += 1
 
+        # Добавляем растягивающиеся элементы для равномерного заполнения
+        # Растягиваем все колонки равномерно
+        for i in range(max_columns):
+            products_layout.setColumnStretch(i, 1)
+
+        # Растягиваем все строки равномерно
+        for i in range(row + 1):
+            products_layout.setRowStretch(i, 1)
+
         # Добавляем контейнер в scroll layout
         self.scroll_layout.addWidget(products_container)
 
@@ -257,88 +387,6 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
                     widget.deleteLater()
                 else:
                     self.clear_layout(item.layout())
-
-    def apply_filters(self):
-        """Применение фильтров по цене и сортировки"""
-        try:
-            min_price = self.lineEdit_2.text().strip()
-            max_price = self.lineEdit_3.text().strip()
-            sort_index = self.comboBox_3.currentIndex()
-
-            query = '''SELECT id, name, brand, description, price, image_path 
-                       FROM product WHERE 1=1'''
-            params = []
-
-            # Фильтр по цене
-            if min_price:
-                query += " AND price >= ?"
-                params.append(float(min_price))
-
-            if max_price:
-                query += " AND price <= ?"
-                params.append(float(max_price))
-
-            # Сортировка
-            if sort_index == 1:  # "От А до Я"
-                query += " ORDER BY name ASC"
-            elif sort_index == 2:  # "От Я до А"
-                query += " ORDER BY name DESC"
-            elif sort_index == 3:  # "По возрастанию цены"
-                query += " ORDER BY price ASC"
-            elif sort_index == 4:  # "По убыванию цены"
-                query += " ORDER BY price DESC"
-
-            conn = get_connection()
-            c = conn.cursor()
-            c.execute(query, params)
-            filtered_products = c.fetchall()
-            conn.close()
-
-            self.display_products(filtered_products)
-
-        except ValueError:
-            QMessageBox.warning(self, "Ошибка", "Введите корректные значения цены")
-        except Exception as e:
-            print(f"Ошибка применения фильтров: {e}")
-
-    def reset_filters(self):
-        """Сброс фильтров"""
-        self.lineEdit_2.clear()
-        self.lineEdit_3.clear()
-        self.lineEdit.clear()
-        self.comboBox_3.setCurrentIndex(0)
-        self.load_products()
-
-    def apply_sorting(self, index):
-        """Применение сортировки"""
-        if index == 0:  # "Сортировать" - без сортировки
-            self.load_products()
-            return
-
-        try:
-            conn = get_connection()
-            c = conn.cursor()
-
-            if index == 1:  # "От А до Я"
-                c.execute('''SELECT id, name, brand, description, price, image_path 
-                             FROM product ORDER BY name ASC''')
-            elif index == 2:  # "От Я до А"
-                c.execute('''SELECT id, name, brand, description, price, image_path 
-                             FROM product ORDER BY name DESC''')
-            elif index == 3:  # "По возрастанию цены"
-                c.execute('''SELECT id, name, brand, description, price, image_path 
-                             FROM product ORDER BY price ASC''')
-            elif index == 4:  # "По убыванию цены"
-                c.execute('''SELECT id, name, brand, description, price, image_path 
-                             FROM product ORDER BY price DESC''')
-
-            sorted_products = c.fetchall()
-            conn.close()
-
-            self.display_products(sorted_products)
-
-        except Exception as e:
-            print(f"Ошибка сортировки товаров: {e}")
 
     def create_product_card(self, product_id, name, brand, price, image_path, description):
         """Создание карточки товара"""
@@ -621,9 +669,11 @@ class ProfileWin(QDialog, Ui_Profile_Form):
     def __init__(self, user_id = None, user_type = 'user'):
         super().__init__()
         self.setupUi(self)
+
+        self.lineEdit_6.setInputMask("+7 (000) 000-00-00")
+
         self.user_id = user_id
         self.user_type = user_type
-
         self.load_user_data()
 
         self.pushButton.clicked.connect(self.save_changes)
@@ -651,9 +701,9 @@ class ProfileWin(QDialog, Ui_Profile_Form):
             self.lineEdit_2.setText(user_data[0] if user_data[0] else "") # имя
             self.lineEdit_3.setText(user_data[2] if user_data[2] else "") # отчество
             self.lineEdit_4.setText(user_data[3] if user_data[3] else "") # логин
-            self.lineEdit_5.setText(user_data[4] if user_data[4] else "") # пароль
-            self.lineEdit_6.setText(user_data[6] if user_data[6] else "") # телефон
-            self.lineEdit_7.setText(user_data[5] if user_data[5] else "") # почта
+            self.lineEdit_5.setText("") # пароль хэширован и выводу не подлежит
+            self.lineEdit_6.setText(user_data[5] if user_data[5] else "") # телефон
+            self.lineEdit_7.setText(user_data[6] if user_data[6] else "") # почта
             self.lineEdit_8.setText(user_data[7] if user_data[7] else "") # адрес
 
     def save_changes(self):
@@ -661,14 +711,41 @@ class ProfileWin(QDialog, Ui_Profile_Form):
         c = conn.cursor()
         try:
             # Получаем текущие значения из полей
-            first_name = self.lineEdit_2.text()
-            last_name = self.lineEdit.text()
-            third_name = self.lineEdit_3.text()
+            first_name = self.lineEdit_2.text().capitalize()
+            last_name = self.lineEdit.text().capitalize()
+            third_name = self.lineEdit_3.text().capitalize()
             login = self.lineEdit_4.text()
             password = self.lineEdit_5.text()
             phone = self.lineEdit_6.text()
             email = self.lineEdit_7.text()
             address = self.lineEdit_8.text()
+
+            if not all([first_name, last_name, third_name, login, password, phone, email, address]):
+                QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
+                return
+
+            phone_digits = ''.join(filter(str.isdigit, phone))
+            if len(phone_digits) != 11 or '_' in phone:
+                QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+                self.lineEdit_phone.setFocus()
+                return
+
+            if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+                QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+                self.lineEdit_email.setFocus()
+                return
+
+            # Хэшируем пароль только если он был изменен
+            if password:
+                hashed_password = hash_password(password)
+            else:
+                # Если пароль не меняли, оставляем старый
+                if self.user_type == 'user':
+                    c.execute('SELECT password FROM user WHERE id = ?', (self.user_id,))
+                else:
+                    c.execute('SELECT password FROM employee WHERE id = ?', (self.user_id,))
+                old_data = c.fetchone()
+                hashed_password = old_data[0] if old_data else ''
 
             # Обновляем данные пользователя в БД
 
@@ -678,14 +755,14 @@ class ProfileWin(QDialog, Ui_Profile_Form):
                                  login = ?, password = ?, phone = ?, email = ?,
                                  address = ? 
                              WHERE id = ?''',
-          (first_name, last_name, third_name, login, password, phone, email, address, self.user_id))
+          (first_name, last_name, third_name, login, hashed_password, phone, email, address, self.user_id))
             else:
                 c.execute('''UPDATE employee 
                              SET first_name = ?, last_name = ?, third_name = ?, 
                                  login = ?, password = ?, phone = ?, email = ?,
                                  address = ? 
                              WHERE id = ?''',
-          (first_name, last_name, third_name, login, password, phone, email, address, self.user_id))
+          (first_name, last_name, third_name, login, hashed_password, phone, email, address, self.user_id))
             conn.commit()
             QMessageBox.information(self,'Успешно', 'Данные успешно сохранены')
         except Exception as e:
@@ -742,13 +819,18 @@ class OrderWin(QDialog, Ui_Order_Form):
         menu_manager = MenuManager(user_id, 'user')
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_6.clicked.connect(self.exit_to_catalog)
-
+        self.pushButton_2.clicked.connect(self.open_cart)
         # Загружаем заказы пользователя
         self.load_user_orders()
 
     def exit_to_catalog(self):
         self.close()
         self.win = CatalogWin(self.user_id)
+        self.win.show()
+
+    def open_cart(self):
+        self.close()
+        self.win = ShoppingCart(self.user_id)
         self.win.show()
 
     def load_user_orders(self):
@@ -777,7 +859,6 @@ class OrderWin(QDialog, Ui_Order_Form):
     def display_orders(self, orders):
         """Отображение заказов в таблице"""
         if not orders:
-            # Если заказов нет, показываем сообщение
             self.tableWidget.setRowCount(1)
             self.tableWidget.setColumnCount(1)
             no_orders_item = QtWidgets.QTableWidgetItem("Заказы не найдены")
@@ -785,19 +866,17 @@ class OrderWin(QDialog, Ui_Order_Form):
             self.tableWidget.setItem(0, 0, no_orders_item)
             return
 
-        # Настраиваем таблицу
+        # Настраиваем таблицу с 5 столбцами
         self.tableWidget.setRowCount(len(orders))
-        self.tableWidget.setColumnCount(4)
+        self.tableWidget.setColumnCount(5)
 
-        # Устанавливаем заголовки
-        headers = ['ID заказа', 'Дата', 'Статус', 'Сумма']
+        headers = ['Номер', 'Дата', 'Содержимое', 'Статус', 'Стоимость']
         self.tableWidget.setHorizontalHeaderLabels(headers)
 
-        # Заполняем таблицу данными
         for row, order in enumerate(orders):
             order_id, date, status, total_sum = order
 
-            # ID заказа
+            # Номер заказа
             id_item = QtWidgets.QTableWidgetItem(str(order_id))
             self.tableWidget.setItem(row, 0, id_item)
 
@@ -805,22 +884,154 @@ class OrderWin(QDialog, Ui_Order_Form):
             date_item = QtWidgets.QTableWidgetItem(date)
             self.tableWidget.setItem(row, 1, date_item)
 
+            # Кнопка просмотра содержимого
+            view_button = QtWidgets.QPushButton("Просмотреть содержимое")
+            view_button.setStyleSheet("""
+                QPushButton {
+                    background-color: transparent;
+                    color: black;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-family: 'Segoe Print';
+                    font-size: 10px;
+                    min-width: 120px;
+                }
+            """)
+            view_button.clicked.connect(lambda checked, oid=order_id: self.view_order_contents(oid))
+            self.tableWidget.setCellWidget(row, 2, view_button)
+
             # Статус
             status_item = QtWidgets.QTableWidgetItem(status)
-            self.tableWidget.setItem(row, 2, status_item)
+            self.tableWidget.setItem(row, 3, status_item)
 
-            # Сумма
+            # Стоимость
             sum_item = QtWidgets.QTableWidgetItem(f"{float(total_sum):.2f} руб.")
             sum_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 3, sum_item)
+            self.tableWidget.setItem(row, 4, sum_item)
 
-        # Настраиваем внешний вид таблицы
+        # Настройка внешнего вида
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
-        # Устанавливаем сортировку по дате (новые сверху)
-        self.tableWidget.sortItems(1, QtCore.Qt.DescendingOrder)
+    def view_order_contents(self, order_id):
+        """Просмотр содержимого заказа"""
+        try:
+            dialog = OrderContentsDialog(self, order_id)
+            dialog.exec_()
+
+        except Exception as e:
+            print(f"Ошибка открытия диалога просмотра заказа: {e}")
+            QMessageBox.warning(self, "Ошибка", "Не удалось открыть содержимое заказа")
+
+class OrderContentsDialog(QDialog, Ui_OrderContentsDialog):
+    def __init__(self, parent=None, order_id=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        self.order_id = order_id
+
+        # Настраиваем таблицу
+        self.setup_table()
+
+        # Подключаем кнопку закрытия
+        self.pushButton_close.clicked.connect(self.close)
+
+        # Загружаем данные заказа
+        self.load_order_contents()
+
+    def setup_table(self):
+        """Настройка таблицы товаров"""
+        headers = ["Товар", "Цена", "Количество", "Сумма"]
+        self.tableWidget_products.setHorizontalHeaderLabels(headers)
+
+    def load_order_contents(self):
+        """Загрузка содержимого заказа"""
+        try:
+            conn = get_connection()
+            c = conn.cursor()
+
+            # Получаем основную информацию о заказе
+            c.execute('''
+                SELECT uo.id, uo.date, uo.status, uo.sum, 
+                       u.first_name, u.last_name
+                FROM user_order uo
+                LEFT JOIN user u ON uo.user_id = u.id
+                WHERE uo.id = ?
+            ''', (self.order_id,))
+            order_data = c.fetchone()
+
+            if order_data:
+                # Обновляем заголовок
+                order_info = f"Заказ #{order_data[0]} от {order_data[1]}"
+                if order_data[4] and order_data[5]:
+                    order_info += f" - {order_data[4]} {order_data[5]}"
+                order_info += f" (Статус: {order_data[2]})"
+                self.label_order_info.setText(order_info)
+
+                # Получаем товары в заказе
+                c.execute('''
+                    SELECT p.name, op.price_at_time, op.quantity, 
+                           (op.price_at_time * op.quantity) as total
+                    FROM order_position op
+                    JOIN product p ON op.product_id = p.id
+                    WHERE op.order_id = ?
+                    ORDER BY p.name
+                ''', (self.order_id,))
+                order_products = c.fetchall()
+
+                # Отображаем товары в таблице
+                self.display_order_products(order_products)
+
+                # Обновляем итоговую сумму
+                total_sum = sum(product[3] for product in order_products)
+                self.label_total.setText(f"Итоговая сумма: {total_sum:.2f} руб.")
+            else:
+                self.label_order_info.setText("Заказ не найден")
+
+            conn.close()
+
+        except Exception as e:
+            print(f"Ошибка загрузки содержимого заказа: {e}")
+            self.label_order_info.setText("Ошибка загрузки данных")
+
+    def display_order_products(self, order_products):
+        """Отображение товаров заказа в таблице"""
+        if not order_products:
+            self.tableWidget_products.setRowCount(1)
+            self.tableWidget_products.setColumnCount(1)
+            no_items = QtWidgets.QTableWidgetItem("В заказе нет товаров")
+            no_items.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.tableWidget_products.setItem(0, 0, no_items)
+            return
+
+        self.tableWidget_products.setRowCount(len(order_products))
+
+        for row, product in enumerate(order_products):
+            name, price, quantity, total = product
+
+            # Название товара
+            name_item = QtWidgets.QTableWidgetItem(name)
+            self.tableWidget_products.setItem(row, 0, name_item)
+
+            # Цена
+            price_item = QtWidgets.QTableWidgetItem(f"{float(price):.2f} руб.")
+            price_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            self.tableWidget_products.setItem(row, 1, price_item)
+
+            # Количество
+            quantity_item = QtWidgets.QTableWidgetItem(str(quantity))
+            quantity_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            self.tableWidget_products.setItem(row, 2, quantity_item)
+
+            # Сумма
+            total_item = QtWidgets.QTableWidgetItem(f"{float(total):.2f} руб.")
+            total_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            self.tableWidget_products.setItem(row, 3, total_item)
+
+        # Настраиваем таблицу
+        self.tableWidget_products.resizeColumnsToContents()
+        self.tableWidget_products.horizontalHeader().setStretchLastSection(True)
 
 class ShoppingCart(QDialog, Ui_Cart_Form):
     def __init__(self, user_id=None):
@@ -1561,7 +1772,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
     def load_employees_to_table(self):
         conn = get_connection()
         c = conn.cursor()
-        c.execute('''SELECT * FROM employee''')
+        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM employee''')
         data = c.fetchall()
         conn.close()
 
@@ -1571,7 +1782,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
     def load_users_to_table(self):
         conn = get_connection()
         c = conn.cursor()  # Исправлено: было connect.cursor()
-        c.execute('''SELECT * FROM user''')
+        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM user''')
         data = c.fetchall()
         conn.close()
 
@@ -1659,7 +1870,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         table_widget.setRowCount(len(data))  # кол-во строк и столбцов
         table_widget.setColumnCount(len(data[0]))
 
-        headers = ['ID', 'Имя', 'Фамилия', 'Отчество', 'Логин', 'Пароль', 'Телефон', 'Email', 'Адрес']
+        headers = ['ID', 'Имя', 'Фамилия', 'Отчество', 'Логин', 'Телефон', 'Email', 'Адрес']
         table_widget.setHorizontalHeaderLabels(headers)
 
         for row_num, row_data in enumerate(data):
@@ -1968,13 +2179,17 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
         super().__init__(parent)
         self.setupUi(self)
 
+        self.lineEdit_phone.setInputMask("+7 (000) 000-00-00")
         self.pushButton_save.clicked.connect(self.save_user)
         self.pushButton_cancel.clicked.connect(self.reject)
 
     def save_user(self):
-        first_name = self.lineEdit_first_name.text().strip()
-        last_name = self.lineEdit_last_name.text().strip()
-        third_name = self.lineEdit_third_name.text().strip()
+        conn = get_connection()
+        c = conn.cursor()
+
+        first_name = self.lineEdit_first_name.text().strip().capitalize()
+        last_name = self.lineEdit_last_name.text().strip().capitalize()
+        third_name = self.lineEdit_third_name.text().strip().capitalize()
         login = self.lineEdit_login.text().strip()
         password = self.lineEdit_password.text().strip()
         phone = self.lineEdit_phone.text().strip()
@@ -1985,12 +2200,43 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
             return
 
+        phone_digits = ''.join(filter(str.isdigit, phone))
+        if len(phone_digits) != 11 or '_' in phone:
+            QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+            self.lineEdit_phone.setFocus()
+            return
+
+        if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+            QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+            self.lineEdit_email.setFocus()
+            return
+
+        c.execute('SELECT id FROM user WHERE login = ?', (login,))
+        existing_user = c.fetchone()
+        if existing_user:
+            QMessageBox.warning(self, "Ошибка",
+                                "Пользователь с таким логином уже существует. Выберите другой логин.")
+            self.lineEdit_login.setFocus()
+            self.lineEdit_login.selectAll()
+            return
+
+        c.execute('SELECT id FROM employee WHERE login = ?', (login,))
+        existing_user = c.fetchone()
+        if existing_user:
+            QMessageBox.warning(self, "Ошибка",
+                                "Пользователь с таким логином уже существует. Выберите другой логин.")
+            self.lineEdit_login.setFocus()
+            self.lineEdit_login.selectAll()
+            return
+
         conn = get_connection()
         c = conn.cursor()
         try:
+            hashed_password = hash_password(password)
+
             c.execute('''INSERT INTO user (first_name, last_name, third_name, login, password, phone, email, address) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                      (first_name, last_name, third_name, login, password, phone, email, address))
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                      (first_name, last_name, third_name, login, hashed_password, phone, email, address))
             conn.commit()
             QMessageBox.information(self, "Успех", "Пользователь успешно добавлен")
             self.accept()
@@ -2004,13 +2250,17 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
         super().__init__(parent)
         self.setupUi(self)
 
+        self.lineEdit_phone.setInputMask("+7 (000) 000-00-00")
         self.pushButton_save.clicked.connect(self.save_employee)
         self.pushButton_cancel.clicked.connect(self.reject)
 
     def save_employee(self):
-        first_name = self.lineEdit_first_name.text().strip()
-        last_name = self.lineEdit_last_name.text().strip()
-        third_name = self.lineEdit_third_name.text().strip()
+        conn = get_connection()
+        c = conn.cursor()
+
+        first_name = self.lineEdit_first_name.text().strip().capitalize()
+        last_name = self.lineEdit_last_name.text().strip().capitalize()
+        third_name = self.lineEdit_third_name.text().strip().capitalize()
         login = self.lineEdit_login.text().strip()
         password = self.lineEdit_password.text().strip()
         phone = self.lineEdit_phone.text().strip()
@@ -2021,12 +2271,43 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
             return
 
+        phone_digits = ''.join(filter(str.isdigit, phone))
+        if len(phone_digits) != 11 or '_' in phone:
+            QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+            self.lineEdit_phone.setFocus()
+            return
+
+        if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+            QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+            self.lineEdit_email.setFocus()
+            return
+
+        c.execute('SELECT id FROM user WHERE login = ?', (login,))
+        existing_user = c.fetchone()
+        if existing_user:
+            QMessageBox.warning(self, "Ошибка",
+                                "Пользователь с таким логином уже существует. Выберите другой логин.")
+            self.lineEdit_login.setFocus()
+            self.lineEdit_login.selectAll()
+            return
+
+        c.execute('SELECT id FROM employee WHERE login = ?', (login,))
+        existing_user = c.fetchone()
+        if existing_user:
+            QMessageBox.warning(self, "Ошибка",
+                                "Пользователь с таким логином уже существует. Выберите другой логин.")
+            self.lineEdit_login.setFocus()
+            self.lineEdit_login.selectAll()
+            return
+
         conn = get_connection()
         c = conn.cursor()
         try:
+            hashed_password = hash_password(password)
+
             c.execute('''INSERT INTO employee (first_name, last_name, third_name, login, password, phone, email, address) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                      (first_name, last_name, third_name, login, password, phone, email, address))
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                      (first_name, last_name, third_name, login, hashed_password, phone, email, address))
             conn.commit()
             QMessageBox.information(self, "Успех", "Сотрудник успешно добавлен")
             self.accept()
@@ -2099,10 +2380,10 @@ class EditProductDialog(QDialog, Ui_EditProductDialog):
 
     def save_changes(self):
         """Сохраняем изменения"""
-        name = self.lineEdit_name.text().strip()
-        description = self.textEdit_description.toPlainText().strip()
+        name = self.lineEdit_name.text().strip().capitalize()
+        description = self.textEdit_description.toPlainText().strip().capitalize()
         price = self.lineEdit_price.text().strip()
-        brand = self.lineEdit_brand.text().strip()
+        brand = self.lineEdit_brand.text().strip().capitalize()
 
         if not name:
             QMessageBox.warning(self, "Ошибка", "Введите название товара")
@@ -2134,6 +2415,7 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         self.setupUi(self)
         self.user_id = user_id
 
+        self.lineEdit_phone.setInputMask("+7 (000) 000-00-00")
         self.pushButton_save.clicked.connect(self.save_changes)
         self.pushButton_cancel.clicked.connect(self.reject)
 
@@ -2164,15 +2446,26 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
 
     def save_changes(self):
         """Сохраняем изменения"""
-        first_name = self.lineEdit_first_name.text().strip()
-        last_name = self.lineEdit_last_name.text().strip()
-        third_name = self.lineEdit_third_name.text().strip()
+        first_name = self.lineEdit_first_name.text().strip().capitalize()
+        last_name = self.lineEdit_last_name.text().strip().capitalize()
+        third_name = self.lineEdit_third_name.text().strip().capitalize()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
         address = self.lineEdit_address.text().strip()
 
         if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
+            return
+
+        phone_digits = ''.join(filter(str.isdigit, phone))
+        if len(phone_digits) != 11 or '_' in phone:
+            QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+            self.lineEdit_phone.setFocus()
+            return
+
+        if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+            QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+            self.lineEdit_email.setFocus()
             return
 
         conn = get_connection()
@@ -2196,6 +2489,7 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         self.setupUi(self)
         self.employee_id = employee_id
 
+        self.lineEdit_phone.setInputMask("+7 (000) 000-00-00")
         self.pushButton_save.clicked.connect(self.save_changes)
         self.pushButton_cancel.clicked.connect(self.reject)
 
@@ -2226,15 +2520,26 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
 
     def save_changes(self):
         """Сохраняем изменения"""
-        first_name = self.lineEdit_first_name.text().strip()
-        last_name = self.lineEdit_last_name.text().strip()
-        third_name = self.lineEdit_third_name.text().strip()
+        first_name = self.lineEdit_first_name.text().strip().capitalize()
+        last_name = self.lineEdit_last_name.text().strip().capitalize()
+        third_name = self.lineEdit_third_name.text().strip().capitalize()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
         address = self.lineEdit_address.text().strip()
 
         if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
+            return
+
+        phone_digits = ''.join(filter(str.isdigit, phone))
+        if len(phone_digits) != 11 or '_' in phone:
+            QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
+            self.lineEdit_phone.setFocus()
+            return
+
+        if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
+            QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
+            self.lineEdit_email.setFocus()
             return
 
         conn = get_connection()
@@ -2401,8 +2706,8 @@ class EditCategoryDialog(QDialog, Ui_EditCategoryDialog):
 
     def save_changes(self):
         """Сохраняем изменения категории"""
-        name = self.lineEdit_name.text().strip()
-        description = self.textEdit_description.toPlainText().strip()
+        name = self.lineEdit_name.text().strip().capitalize()
+        description = self.textEdit_description.toPlainText().strip().capitalize()
 
         if not name:
             QMessageBox.warning(self, "Ошибка", "Введите название категории")
