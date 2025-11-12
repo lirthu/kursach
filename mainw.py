@@ -2,7 +2,7 @@ import os
 import sys
 import sqlite3
 import hashlib
-import secrets
+
 
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QTableWidgetItem, QMenu
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -1897,24 +1897,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         except Exception as e:
             print(f"Ошибка при смене вкладки: {e}")
 
-    def save_changes(self):
-        """Сохранение изменений в таблице"""
-        current_tab = self.tabWidget.currentIndex()
-
-        if current_tab == 1:  # Товары
-            self.save_products_changes()
-        # Можно добавить сохранение для других вкладок
-
-    def save_products_changes(self):
-        """Сохранение изменений в таблице товаров"""
-        QMessageBox.information(self, "Информация", "Изменения сохранены")
-
-    def close_event(self, event):
-        """Закрытие подключения к БД при закрытии окна"""
-        if hasattr(self, 'db_connection'):
-            self.db_connection.close()
-        event.accept()
-
 class AddProductDialog(QDialog, Ui_AddProductDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -2556,7 +2538,6 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось обновить сотрудника: {str(e)}")
         finally:
             conn.close()
-
 
 class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
     def __init__(self, parent=None, order_id=None):
