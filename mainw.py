@@ -55,35 +55,31 @@ class MainWindow(QDialog, Ui_Auth_Form):
             self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
 
     def clicked_login(self):
-        connect = get_connection()
-        c = connect.cursor()
-        login = self.lineEdit.text()
-        password = self.lineEdit_2.text()
+        try:
+            connect = get_connection()
+            c = connect.cursor()
+            login = self.lineEdit.text()
+            password = self.lineEdit_2.text()
 
-        hashed_password = hash_password(password)
+            hashed_password = hash_password(password)
 
-        if (not login) or (not hashed_password):
-            QMessageBox.warning(self, "Ошибка", "Введите все данные!")
-            return
+            if (not login) or (not hashed_password):
+                QMessageBox.warning(self, "Ошибка", "Введите все данные!")
+                return
 
-        c.execute('''SELECT id FROM user WHERE login = ? AND password = ?''', (login, hashed_password))
-        result = c.fetchone()
+            c.execute('''SELECT id, role FROM user WHERE login = ? AND password = ?''', (login, hashed_password))
+            result = c.fetchone()
 
-        if result:
-            self.current_user_id = result[0]
-            self.open_main_catalog()
-            return
+            if result:
+                user_id, role = result
+                if role in ['employee', 'user']:
+                    self.open_adminadmin_panel()
+                else:
+                    self.open_main_catalog()
 
-        c.execute('''SELECT id FROM employee WHERE login = ? AND password = ?''', (login, hashed_password))
-        result = c.fetchone()
-
-        if result:
-            self.current_user_id = result[0]
-            self.open_admin_panel()
-            return
-
-        QMessageBox.warning(self, "Ошибка", "Пользователь не найден!")
-
+            QMessageBox.warning(self, "Ошибка", "Пользователь не найден!")
+        except Exception as e:
+            print(e)
     def open_main_catalog(self):
         self.close()
         self.win = CatalogWin(self.current_user_id)

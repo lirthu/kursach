@@ -1,5 +1,4 @@
 import sqlite3
-import hashlib
 
 connect = sqlite3.connect('database.db')
 c = connect.cursor()
@@ -32,7 +31,8 @@ CREATE TABLE IF NOT EXISTS user (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     email VARCHAR(150) NOT NULL,
-    address TEXT NOT NULL)
+    address TEXT NOT NULL,
+    role TEXT CHECK(role IN ('user', 'employee')) DEFAULT 'user')
 ''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS user_order (
@@ -49,28 +49,14 @@ CREATE TABLE IF NOT EXISTS order_position (
     order_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
-    price_at_time REAL NOT NULL,
+    price_at_time DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (order_id) REFERENCES user_order (id),
-    FOREIGN KEY (product_id) REFERENCES product (id)
-)
-''')
-c.execute('''
-CREATE TABLE IF NOT EXISTS employee (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    third_name VARCHAR(100),
-    login VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    email VARCHAR(150) NOT NULL,
-    address TEXT NOT NULL)
+    FOREIGN KEY (product_id) REFERENCES product (id))
 ''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS cart (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL UNIQUE,
-    created_date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user (id))
 ''')
 c.execute('''
@@ -82,13 +68,8 @@ CREATE TABLE IF NOT EXISTS cart_item (
     FOREIGN KEY (cart_id) REFERENCES cart (id),
     FOREIGN KEY (product_id) REFERENCES product (id))
 ''')
-password = "1234"
-hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-c.execute('''DELETE FROM employee WHERE login = "admin"''')
-
-c.execute('''INSERT INTO employee
-    (first_name, last_name, third_name, login, password, phone, email, address)
-    VALUES ('Ваня','Пeтров','Иванович','admin',?,'+79990000000','admin@example.com','адрес')''',
-    (hashed_password,))
+c.execute('''SELECT * FROM user''')
+result = c.fetchall()
+for i in result:
+    print(dict(i))
 connect.commit()
