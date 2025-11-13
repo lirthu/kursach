@@ -91,21 +91,4 @@ c.execute('''INSERT INTO employee
     (first_name, last_name, third_name, login, password, phone, email, address)
     VALUES ('Ваня','Пeтров','Иванович','admin',?,'+79990000000','admin@example.com','адрес')''',
     (hashed_password,))
-# c.execute('''DELETE FROM user''')
-# c.execute('''DELETE FROM employee''')
-# c.execute('''DELETE FROM user_order''')
-# c.execute('''DELETE FROM order_position''')
-# c.execute('''DELETE FROM cart''')
-# c.execute('''DELETE FROM cart_item''')
-# c.execute('''DELETE FROM category''')
-# c.execute('''DELETE FROM product''')
-
-c.execute('''SELECT * FROM user''')
-res = c.fetchall()
-for r in res:
-    print(dict(r))
-c.execute('''SELECT * FROM employee''')
-res1 = c.fetchall()
-for t in res1:
-    print(dict(t))
 connect.commit()

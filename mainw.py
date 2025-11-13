@@ -3,7 +3,6 @@ import sys
 import sqlite3
 import hashlib
 
-
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QTableWidgetItem, QMenu
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -393,7 +392,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         # Основная карточка
         card = QtWidgets.QGroupBox()
         card.setMinimumSize(200, 320)
-        card.setMaximumSize(250, 400)
+        card.setMaximumSize(200, 230)
         card.setStyleSheet("""
             QGroupBox {
                 border: 2px solid #cccccc;
@@ -1954,8 +1953,8 @@ class AddProductDialog(QDialog, Ui_AddProductDialog):
 
     def save_product(self):
         # Получаем данные из полей
-        name = self.lineEdit_name.text().strip()
-        description = self.textEdit_description.toPlainText().strip()
+        name = self.lineEdit_name.text().strip().capitalize()
+        description = self.textEdit_description.toPlainText().strip().capitalize()
         price = self.lineEdit_price.text().strip()
         category_id = self.comboBox_category.currentData()
         brand = self.lineEdit_brand.text().strip()
@@ -2308,8 +2307,8 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
         self.pushButton_cancel.clicked.connect(self.reject)
 
     def save_category(self):
-        name = self.lineEdit_name.text().strip()
-        description = self.textEdit_description.toPlainText().strip()
+        name = self.lineEdit_name.text().strip().capitalize()
+        description = self.textEdit_description.toPlainText().strip().capitalize()
 
         if not name or not description:
             QMessageBox.warning(self, "Ошибка", "Введите данные для добавления категории")
@@ -2330,66 +2329,159 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
         finally:
             conn.close()
 
+
 class EditProductDialog(QDialog, Ui_EditProductDialog):
     def __init__(self, parent=None, product_id=None):
         super().__init__(parent)
         self.setupUi(self)
         self.product_id = product_id
 
-        self.pushButton_save.clicked.connect(self.save_changes)
+        # Правильное подключение сигналов
+        self.pushButton_save.clicked.connect(self.save_product)
         self.pushButton_cancel.clicked.connect(self.reject)
+        self.pushButton_browse.clicked.connect(self.browse_image)  # Исправлено!
 
+        self.load_categories_from_db()
         self.load_product_data()
 
-    def load_product_data(self):
-        """Загружаем данные товара"""
+    def browse_image(self):
+        """Выбор файла изображения"""
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Выберите изображение товара",
+            "",
+            "Images (*.png *.jpg *.jpeg *.bmp *.gif)"
+        )
+        if file_name:
+            self.lineEdit_image.setText(file_name)
+            self.show_image_preview(file_name)
+
+    def show_image_preview(self, image_path):
+        """Показ превью изображения"""
+        try:
+            pixmap = QtGui.QPixmap(image_path)
+            if not pixmap.isNull():
+                # Масштабируем изображение для превью
+                scaled_pixmap = pixmap.scaled(200, 200, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                self.label_image_preview.setPixmap(scaled_pixmap)
+            else:
+                self.label_image_preview.setText("Неверный формат\nизображения")
+        except Exception as e:
+            print(f"Ошибка загрузки изображения: {e}")
+            self.label_image_preview.setText("Ошибка\nзагрузки")
+
+    def load_categories_from_db(self):
+        """Загружаем категории из базы данных"""
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute("SELECT name, description, price, brand FROM product WHERE id = ?", (self.product_id,))
+            c.execute("SELECT id, name FROM category")
+            categories = c.fetchall()
+            self.comboBox_category.clear()
+            self.comboBox_category.addItem("")  # Пустой элемент
+            for category in categories:
+                self.comboBox_category.addItem(category[1], category[0])  # name как текст, id как данные
+        except Exception as e:
+            print(f"Ошибка загрузки категорий: {e}")
+        finally:
+            conn.close()
+
+    def load_product_data(self):
+        """Загружаем данные товара для редактирования"""
+        if not self.product_id:  # Если ID нет, значит это создание нового товара
+            self.setWindowTitle("Добавить товар")
+            self.label_title.setText("Добавление нового товара")
+            return
+
+        conn = get_connection()
+        c = conn.cursor()
+        try:
+            c.execute("SELECT name, description, price, category_id, brand, image_path FROM product WHERE id = ?",
+                      (self.product_id,))
             product_data = c.fetchone()
 
             if product_data:
+                self.setWindowTitle("Редактировать товар")
+                self.label_title.setText("Редактирование товара")
+
                 self.lineEdit_name.setText(product_data[0] or "")
                 self.textEdit_description.setPlainText(product_data[1] or "")
                 self.lineEdit_price.setText(str(product_data[2]) if product_data[2] else "")
-                self.lineEdit_brand.setText(product_data[3] or "")
+
+                # Устанавливаем категорию
+                category_id = product_data[3]
+                if category_id:
+                    index = self.comboBox_category.findData(category_id)
+                    if index >= 0:
+                        self.comboBox_category.setCurrentIndex(index)
+
+                self.lineEdit_brand.setText(product_data[4] or "")
+
+                # Загружаем изображение
+                image_path = product_data[5] or ""
+                self.lineEdit_image.setText(image_path)
+                if image_path:
+                    self.show_image_preview(image_path)
 
         except Exception as e:
             print(f"Ошибка загрузки данных товара: {e}")
         finally:
             conn.close()
 
-    def save_changes(self):
-        """Сохраняем изменения"""
+    def save_product(self):
+        # Получаем данные из полей
         name = self.lineEdit_name.text().strip().capitalize()
         description = self.textEdit_description.toPlainText().strip().capitalize()
         price = self.lineEdit_price.text().strip()
-        brand = self.lineEdit_brand.text().strip().capitalize()
+        category_id = self.comboBox_category.currentData()
+        brand = self.lineEdit_brand.text().strip()
+        image_path = self.lineEdit_image.text().strip()
 
+        # Валидация
         if not name:
             QMessageBox.warning(self, "Ошибка", "Введите название товара")
             return
-
-        try:
-            float(price)
-        except ValueError:
+        if not price or not self.is_valid_price(price):
             QMessageBox.warning(self, "Ошибка", "Введите корректную цену")
             return
+        if not category_id:
+            QMessageBox.warning(self, "Ошибка", "Выберите категорию")
+            return
 
+        # Сохраняем товар в БД
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute('''UPDATE product SET name=?, description=?, price=?, brand=?
-                        WHERE id=?''',
-                      (name, description, float(price), brand, self.product_id))
+            if self.product_id:  # Редактирование существующего товара
+                c.execute('''UPDATE product 
+                           SET name=?, description=?, price=?, category_id=?, brand=?, image_path=?
+                           WHERE id=?''',
+                          (name, description, float(price), category_id, brand, image_path, self.product_id))
+                message = "Товар успешно обновлен"
+            else:  # Добавление нового товара
+                c.execute('''INSERT INTO product 
+                           (name, description, price, category_id, brand, image_path) 
+                           VALUES (?, ?, ?, ?, ?, ?)''',
+                          (name, description, float(price), category_id, brand, image_path))
+                message = "Товар успешно добавлен"
+
             conn.commit()
-            QMessageBox.information(self, "Успех", "Товар успешно обновлен")
+            QMessageBox.information(self, "Успех", message)
             self.accept()
+
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить товар: {str(e)}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось сохранить товар: {str(e)}")
+            print(f"Ошибка сохранения товара: {e}")
         finally:
             conn.close()
+
+    def is_valid_price(self, price):
+        """Проверяет валидность цены"""
+        try:
+            float(price)
+            return True
+        except ValueError:
+            return False
 
 class EditUserDialog(QDialog, Ui_EditUserDialog):
     def __init__(self, parent=None, user_id=None):
