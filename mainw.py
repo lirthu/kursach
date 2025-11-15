@@ -1337,7 +1337,6 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
         self.win = CatalogWin(self.user_id)
         self.win.show()
 
-
 class AdminPanel(QDialog, Ui_Admin_Form):
     def __init__(self, user_id = None):
         super().__init__()
@@ -2324,7 +2323,6 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
             QMessageBox.critical(self, "Ошибка", f"Не удалось добавить категорию: {str(e)}")
         finally:
             conn.close()
-
 
 class EditProductDialog(QDialog, Ui_EditProductDialog):
     def __init__(self, parent=None, product_id=None):
