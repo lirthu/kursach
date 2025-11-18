@@ -61,28 +61,32 @@ class MainWindow(QDialog, Ui_Auth_Form):
             login = self.lineEdit.text()
             password = self.lineEdit_2.text()
 
-            hashed_password = hash_password(password)
-
-            if (not login) or (not hashed_password):
+            if (not login) or (not password):
                 QMessageBox.warning(self, "Ошибка", "Введите все данные!")
                 return
 
-            c.execute('''SELECT id, role FROM user WHERE login = ? AND password = ?''', (login, hashed_password))
+            hashed_password = hash_password(password)
+
+            c.execute('''SELECT id, role FROM user WHERE login = ? AND password = ?''',
+                      (login, hashed_password))
             result = c.fetchone()
 
             if result:
                 user_id, role = result
-                if role in ['employee', 'user']:
-                    self.open_adminadmin_panel()
+                if role in ['employee']:
+                    self.open_admin_panel()
+                elif role in ['user']:
+                    self.open_main_catalog(user_id)
                 else:
-                    self.open_main_catalog()
-
-            QMessageBox.warning(self, "Ошибка", "Пользователь не найден!")
+                    QMessageBox.warning(self, "Ошибка", "Пользователь не найден!")
+            else:
+                QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль!")
         except Exception as e:
-            print(e)
-    def open_main_catalog(self):
+            QMessageBox.critical(self, "Ошибка", f"Не удалось авторизоваться: {str(e)}")
+
+    def open_main_catalog(self, user_id = None):
         self.close()
-        self.win = CatalogWin(self.current_user_id)
+        self.win = CatalogWin(user_id)
         self.win.show()
 
     def open_register_window(self):
@@ -92,7 +96,7 @@ class MainWindow(QDialog, Ui_Auth_Form):
 
     def open_admin_panel(self):
         self.close()
-        self.win = AdminPanel(self.current_user_id)
+        self.win = AdminPanel()
         self.win.show()
 
 class RegisterWin(QDialog, Ui_Reg_Form):
@@ -225,58 +229,45 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.load_products()
 
     def search_products(self):
-        """Поиск товаров по названию и описанию"""
         search_query = self.lineEdit.text().strip().capitalize()
         self.current_search_query = search_query
 
-        # Если запрос пустой, загружаем все товары
-        if not search_query:
+        if not search_query: # пустой
             self.load_products()
             return
 
         self.apply_filters()
 
     def apply_filters(self):
-        """Применение фильтров по цене, сортировки и поиска"""
         try:
             min_price = self.lineEdit_3.text().strip()
             max_price = self.lineEdit_4.text().strip()
             sort_index = self.comboBox_3.currentIndex()
             search_query = self.current_search_query
-
             query = '''SELECT id, name, brand, description, price, image_path 
                        FROM product WHERE 1=1'''
             params = []
-
-            # Фильтр по поисковому запросу
             if search_query:
                 query += " AND (name LIKE ? OR description LIKE ? OR brand LIKE ?)"
                 search_pattern = f'%{search_query}%'
                 params.extend([search_pattern, search_pattern, search_pattern])
-
-            # Фильтр по цене
             if min_price:
                 query += " AND price >= ?"
                 params.append(float(min_price))
-
             if max_price:
                 query += " AND price <= ?"
                 params.append(float(max_price))
-
-            # Сортировка
-            if sort_index == 1:  # "От А до Я"
+            if sort_index == 1:  # от А до Я
                 query += " ORDER BY name ASC"
-            elif sort_index == 2:  # "От Я до А"
+            elif sort_index == 2:  # от Я до А
                 query += " ORDER BY name DESC"
-            else:  # По умолчанию - по ID
+            else:  # по ID
                 query += " ORDER BY id ASC"
-
             conn = get_connection()
             c = conn.cursor()
             c.execute(query, params)
             filtered_products = c.fetchall()
             conn.close()
-
             self.display_products(filtered_products)
 
         except ValueError:
@@ -285,7 +276,6 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             print(f"Ошибка применения фильтров: {e}")
 
     def reset_filters(self):
-        """Сброс фильтров и поиска"""
         self.lineEdit_3.clear()
         self.lineEdit_4.clear()
         self.lineEdit.clear()  # Очищаем поле поиска
@@ -294,7 +284,6 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.load_products()
 
     def load_products(self):
-        """Загрузка всех товаров из базы данных"""
         try:
             conn = get_connection()
             c = conn.cursor()
@@ -306,7 +295,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             self.display_products(products)
 
         except Exception as e:
-            print(f"Ошибка загрузки товаров: {e}")
+            QMessageBox.critical(self, 'Ошибка', f'Не удалось загрузить товары {e}')
 
     def display_products(self, products):
         """Отображение товаров в scrollArea с равномерным заполнением экрана"""
@@ -769,7 +758,6 @@ class MenuManager:
         self.user_type = user_type
 
     def create_profile_menu(self, parent_window):
-        """Создаем выпадающее меню для кнопки Профиль"""
         profile_menu = QMenu()
 
         menu_font = profile_menu.font()
@@ -777,12 +765,12 @@ class MenuManager:
         menu_font.setPointSize(10)
         profile_menu.setFont(menu_font)
 
-        # Добавляем пункты меню
         open_profile_menu = profile_menu.addAction("Личные данные")
         open_order_menu = profile_menu.addAction("Заказы")
         profile_menu.addSeparator()
         back_to_log = profile_menu.addAction("Выйти")
 
+        # использование безымянных функций для вызова окон по клику
         open_profile_menu.triggered.connect(lambda: self.open_profile_menu(parent_window))
         open_order_menu.triggered.connect(lambda: self.open_order_menu(parent_window))
         back_to_log.triggered.connect(lambda: self.open_main_window_return(parent_window))
@@ -829,20 +817,15 @@ class OrderWin(QDialog, Ui_Order_Form):
         self.win.show()
 
     def load_user_orders(self):
-        """Загрузка заказов пользователя из БД"""
         try:
             conn = get_connection()
             c = conn.cursor()
-
-            # Получаем заказы пользователя
             c.execute('''
                 SELECT id, date, status, sum 
                 FROM user_order 
                 WHERE user_id = ?
-                ORDER BY date DESC
-            ''', (self.user_id,))
+                ORDER BY date DESC''', (self.user_id,))
             orders = c.fetchall()
-
             conn.close()
 
             self.display_orders(orders)
@@ -941,12 +924,9 @@ class OrderContentsDialog(QDialog, Ui_OrderContentsDialog):
         self.tableWidget_products.setHorizontalHeaderLabels(headers)
 
     def load_order_contents(self):
-        """Загрузка содержимого заказа"""
         try:
             conn = get_connection()
             c = conn.cursor()
-
-            # Получаем основную информацию о заказе
             c.execute('''
                 SELECT uo.id, uo.date, uo.status, uo.sum, 
                        u.first_name, u.last_name
@@ -957,14 +937,12 @@ class OrderContentsDialog(QDialog, Ui_OrderContentsDialog):
             order_data = c.fetchone()
 
             if order_data:
-                # Обновляем заголовок
                 order_info = f"Заказ #{order_data[0]} от {order_data[1]}"
                 if order_data[4] and order_data[5]:
                     order_info += f" - {order_data[4]} {order_data[5]}"
                 order_info += f" (Статус: {order_data[2]})"
                 self.label_order_info.setText(order_info)
 
-                # Получаем товары в заказе
                 c.execute('''
                     SELECT p.name, op.price_at_time, op.quantity, 
                            (op.price_at_time * op.quantity) as total
@@ -975,15 +953,12 @@ class OrderContentsDialog(QDialog, Ui_OrderContentsDialog):
                 ''', (self.order_id,))
                 order_products = c.fetchall()
 
-                # Отображаем товары в таблице
                 self.display_order_products(order_products)
 
-                # Обновляем итоговую сумму
                 total_sum = sum(product[3] for product in order_products)
                 self.label_total.setText(f"Итоговая сумма: {total_sum:.2f} руб.")
             else:
                 self.label_order_info.setText("Заказ не найден")
-
             conn.close()
 
         except Exception as e:
@@ -1164,22 +1139,17 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
         self.tableWidget.resizeColumnsToContents()
 
     def update_quantity(self, row, new_quantity):
-        """Обновление количества товара в корзине"""
         try:
-            # Получаем cart_item_id из словаря данных
             cart_item_id = self.cart_items_data.get(row)
             if not cart_item_id:
                 return
 
             conn = get_connection()
             c = conn.cursor()
-
-            # Обновляем количество в БД
             c.execute("UPDATE cart_item SET quantity = ? WHERE id = ?", (new_quantity, cart_item_id))
             conn.commit()
             conn.close()
 
-            # Пересчитываем стоимость строки
             price_text = self.tableWidget.item(row, 2).text()
             price = float(price_text)
             new_total = price * new_quantity
@@ -1188,14 +1158,12 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
             total_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             self.tableWidget.setItem(row, 3, total_item)
 
-            # Пересчитываем общую сумму
             self.calculate_total_sum()
 
         except Exception as e:
             print(f"Ошибка обновления количества: {e}")
 
     def delete_item_by_row(self, row):
-        """Удаление товара из корзины по номеру строки"""
         try:
             cart_item_id = self.cart_items_data.get(row)
             if not cart_item_id:
@@ -1215,14 +1183,12 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
                 conn.commit()
                 conn.close()
 
-                # Перезагружаем корзину
                 self.load_cart_data()
 
                 QMessageBox.information(self, "Успех", "Товар удален из корзины")
 
         except Exception as e:
-            print(f"Ошибка удаления товара: {e}")
-            QMessageBox.warning(self, "Ошибка", "Не удалось удалить товар из корзины")
+            QMessageBox.warning(self, "Ошибка", f"Не удалось удалить товар из корзины {e}")
 
     def calculate_total_sum(self):
         """Пересчет общей суммы заказа"""
@@ -2187,22 +2153,17 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
             self.lineEdit_email.setFocus()
             return
 
-        c.execute('SELECT id FROM user WHERE login = ?', (login,))
+        c.execute('SELECT id, login, phone FROM user WHERE login = ? OR phone = ?', (login, phone,))
         existing_user = c.fetchone()
         if existing_user:
-            QMessageBox.warning(self, "Ошибка",
-                                "Пользователь с таким логином уже существует. Выберите другой логин.")
-            self.lineEdit_login.setFocus()
-            self.lineEdit_login.selectAll()
-            return
-
-        c.execute('SELECT id FROM employee WHERE login = ?', (login,))
-        existing_user = c.fetchone()
-        if existing_user:
-            QMessageBox.warning(self, "Ошибка",
-                                "Пользователь с таким логином уже существует. Выберите другой логин.")
-            self.lineEdit_login.setFocus()
-            self.lineEdit_login.selectAll()
+            if existing_user[1] == login:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с такими логином уже существует!")
+            if existing_user[2] == phone:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с такими номером уже существует!")
+                self.lineEdit_phone.clear()
+                self.lineEdit_phone.setFocus()
             return
 
         conn = get_connection()
@@ -2210,8 +2171,8 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
         try:
             hashed_password = hash_password(password)
 
-            c.execute('''INSERT INTO user (first_name, last_name, third_name, login, password, phone, email, address) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+            c.execute('''INSERT INTO user (first_name, last_name, third_name, login, password, phone, email, address, role) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'user')''',
                       (first_name, last_name, third_name, login, hashed_password, phone, email, address))
             conn.commit()
             QMessageBox.information(self, "Успех", "Пользователь успешно добавлен")
@@ -2258,22 +2219,17 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
             self.lineEdit_email.setFocus()
             return
 
-        c.execute('SELECT id FROM user WHERE login = ?', (login,))
+        c.execute('SELECT id, login, phone FROM user WHERE login = ? OR phone = ?', (login, phone,))
         existing_user = c.fetchone()
         if existing_user:
-            QMessageBox.warning(self, "Ошибка",
-                                "Пользователь с таким логином уже существует. Выберите другой логин.")
-            self.lineEdit_login.setFocus()
-            self.lineEdit_login.selectAll()
-            return
-
-        c.execute('SELECT id FROM employee WHERE login = ?', (login,))
-        existing_user = c.fetchone()
-        if existing_user:
-            QMessageBox.warning(self, "Ошибка",
-                                "Пользователь с таким логином уже существует. Выберите другой логин.")
-            self.lineEdit_login.setFocus()
-            self.lineEdit_login.selectAll()
+            if existing_user[1] == login:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с такими логином уже существует!")
+            if existing_user[2] == phone:
+                QMessageBox.warning(self, "Ошибка",
+                                    "Пользователь с такими номером уже существует!")
+                self.lineEdit_phone.clear()
+                self.lineEdit_phone.setFocus()
             return
 
         conn = get_connection()
@@ -2281,8 +2237,8 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
         try:
             hashed_password = hash_password(password)
 
-            c.execute('''INSERT INTO employee (first_name, last_name, third_name, login, password, phone, email, address) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+            c.execute('''INSERT INTO user (first_name, last_name, third_name, login, password, phone, email, address, role) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'employee')''',
                       (first_name, last_name, third_name, login, hashed_password, phone, email, address))
             conn.commit()
             QMessageBox.information(self, "Успех", "Сотрудник успешно добавлен")
@@ -2330,7 +2286,6 @@ class EditProductDialog(QDialog, Ui_EditProductDialog):
         self.setupUi(self)
         self.product_id = product_id
 
-        # Правильное подключение сигналов
         self.pushButton_save.clicked.connect(self.save_product)
         self.pushButton_cancel.clicked.connect(self.reject)
         self.pushButton_browse.clicked.connect(self.browse_image)  # Исправлено!
@@ -2651,11 +2606,9 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
         self.tableWidget_products.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)  # Только чтение
 
     def load_order_data(self):
-        """Загружаем данные заказа и его товары"""
         conn = get_connection()
         c = conn.cursor()
         try:
-            # Загружаем основную информацию о заказе
             c.execute('''SELECT user_id, date, status, sum 
                          FROM user_order WHERE id = ?''', (self.order_id,))
             order_data = c.fetchone()
@@ -2663,26 +2616,21 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
             if order_data:
                 user_id, date, status, total_sum = order_data
 
-                # Устанавливаем номер заказа
                 self.label_order_id_value.setText(str(self.order_id))
 
-                # Устанавливаем пользователя (только для просмотра)
                 c.execute('''SELECT first_name, last_name FROM user WHERE id = ?''', (user_id,))
                 user_data = c.fetchone()
                 if user_data:
                     user_name = f"{user_data[0]} {user_data[1]}"
                     self.label_user_value.setText(user_name)
 
-                # Устанавливаем статус (для редактирования)
                 index = self.comboBox_status.findText(status)
                 if index >= 0:
                     self.comboBox_status.setCurrentIndex(index)
 
-                # Устанавливаем дату и сумму (только для просмотра)
                 self.label_date_value.setText(date)
                 self.label_total_value.setText(f"{total_sum:.2f} руб.")
 
-            # Загружаем товары в заказе (только для просмотра)
             c.execute('''SELECT p.name, op.price_at_time, op.quantity
                          FROM order_position op
                          JOIN product p ON op.product_id = p.id

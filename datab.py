@@ -7,7 +7,7 @@ c.row_factory = sqlite3.Row
 c.execute('''
 CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(20) NOT NULL UNIQUE,
+    name VARCHAR(30) UNIQUE NOT NULL ,
     description TEXT NOT NULL)
 ''')
 c.execute('''
@@ -17,13 +17,13 @@ CREATE TABLE IF NOT EXISTS product (
     name VARCHAR(40) NOT NULL,
     brand VARCHAR(20),
     description TEXT,
-    price DECIMAL(10,2),
+    price DECIMAL(10,2) NOT NULL,
     image_path TEXT,
     FOREIGN KEY (category_id) REFERENCES category (id))
 ''')
 c.execute('''
 CREATE TABLE IF NOT EXISTS user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     third_name VARCHAR(100),
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS user (
 c.execute('''
 CREATE TABLE IF NOT EXISTS user_order (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     date DATE NOT NULL,
     status TEXT CHECK(status IN('Оформлен', 'Доставляется', 'Выполнен', 'Отменен')) DEFAULT 'Оформлен',
     sum DECIMAL(10,2) NOT NULL,
