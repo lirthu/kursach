@@ -152,22 +152,17 @@ class RegisterWin(QDialog, Ui_Reg_Form):
                 QMessageBox.critical(self, "Ошибка", "Пароли не совпадают.")
                 return
 
-            c.execute('SELECT id FROM user WHERE login = ?', (login,))
+            c.execute('SELECT id, login, phone FROM user WHERE login = ? OR phone = ?', (login, phone,))
             existing_user = c.fetchone()
             if existing_user:
-                QMessageBox.warning(self, "Ошибка",
-                                    "Пользователь с таким логином уже существует. Выберите другой логин.")
-                self.lineEdit_10.setFocus()
-                self.lineEdit_10.selectAll()
-                return
-
-            c.execute('SELECT id FROM employee WHERE login = ?', (login,))
-            existing_user = c.fetchone()
-            if existing_user:
-                QMessageBox.warning(self, "Ошибка",
-                                    "Пользователь с таким логином уже существует. Выберите другой логин.")
-                self.lineEdit_10.setFocus()
-                self.lineEdit_10.selectAll()
+                if existing_user[1] == login:
+                    QMessageBox.warning(self, "Ошибка",
+                                        "Пользователь с такими логином уже существует!")
+                elif existing_user[2] == phone:
+                    QMessageBox.warning(self, "Ошибка",
+                                        "Пользователь с такими номером уже существует!")
+                    self.lineEdit_3.clear()
+                    self.lineEdit_3.setFocus()
                 return
 
             hashed_password = hash_password(password)
@@ -207,10 +202,8 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
         self.showMaximized()
 
-        # ИСПРАВЛЕНИЕ: Используем правильное имя содержимого scrollArea
         self.scroll_content = self.scrollAreaWidgetContents_2
 
-        # Создаем layout для содержимого scrollArea
         self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
 
@@ -226,7 +219,28 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.lineEdit.returnPressed.connect(self.search_products)
         self.current_search_query = ""
 
+        self.load_categories_to_combo()
         self.load_products()
+
+    def load_categories_to_combo(self):
+        """Загрузка категорий из БД в комбобокс"""
+        try:
+            conn = get_connection()
+            c = conn.cursor()
+            c.execute('''SELECT id, name FROM category ORDER BY name''')
+            categories = c.fetchall()
+            conn.close()
+
+            # Очищаем комбобокс и добавляем пункт "Все категории"
+            self.comboBox.clear()
+            self.comboBox.addItem("Все категории", None)  # None означает отсутствие фильтрации по категории
+
+            # Добавляем категории из БД
+            for category in categories:
+                self.comboBox.addItem(category[1], category[0])  # name как текст, id как данные
+
+        except Exception as e:
+            print(f"Ошибка загрузки категорий: {e}")
 
     def search_products(self):
         search_query = self.lineEdit.text().strip().capitalize()
@@ -244,36 +258,73 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             max_price = self.lineEdit_4.text().strip()
             sort_index = self.comboBox_3.currentIndex()
             search_query = self.current_search_query
-            query = '''SELECT id, name, brand, description, price, image_path 
-                       FROM product WHERE 1=1'''
+            selected_category_id = self.comboBox.currentData()  # Получаем ID выбранной категории
+
+            query = '''SELECT p.id, p.name, p.brand, p.description, p.price, p.image_path 
+                       FROM product p WHERE 1=1'''
             params = []
+
             if search_query:
-                query += " AND (name LIKE ? OR description LIKE ? OR brand LIKE ?)"
+                query += " AND (p.name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)"
                 search_pattern = f'%{search_query}%'
                 params.extend([search_pattern, search_pattern, search_pattern])
-            if min_price:
-                query += " AND price >= ?"
-                params.append(float(min_price))
-            if max_price:
-                query += " AND price <= ?"
-                params.append(float(max_price))
+
+            # Фильтрация по категории
+            if selected_category_id:  # Если выбрана конкретная категория (не "Все категории")
+                query += " AND p.category_id = ?"
+                params.append(selected_category_id)
+
+            # Валидация цен
+            if min_price and max_price:
+                try:
+                    min_val = float(min_price)
+                    max_val = float(max_price)
+                    if min_val > 0 and max_val > 0 and min_val <= max_val:
+                        query += " AND p.price >= ? AND p.price <= ?"
+                        params.extend([min_val, max_val])
+                    else:
+                        QMessageBox.warning(self, "Ошибка", "Введите корректные значения цены (мин <= макс)")
+                        return
+                except ValueError:
+                    QMessageBox.warning(self, "Ошибка", "Введите числовые значения для цены")
+                    return
+            elif min_price:
+                try:
+                    min_val = float(min_price)
+                    if min_val > 0:
+                        query += " AND p.price >= ?"
+                        params.append(min_val)
+                except ValueError:
+                    QMessageBox.warning(self, "Ошибка", "Введите корректное значение для минимальной цены")
+                    return
+            elif max_price:
+                try:
+                    max_val = float(max_price)
+                    if max_val > 0:
+                        query += " AND p.price <= ?"
+                        params.append(max_val)
+                except ValueError:
+                    QMessageBox.warning(self, "Ошибка", "Введите корректное значение для максимальной цены")
+                    return
+
             if sort_index == 1:  # от А до Я
-                query += " ORDER BY name ASC"
+                query += " ORDER BY p.name ASC"
             elif sort_index == 2:  # от Я до А
-                query += " ORDER BY name DESC"
+                query += " ORDER BY p.name DESC"
             else:  # по ID
-                query += " ORDER BY id ASC"
+                query += " ORDER BY p.id ASC"
+
             conn = get_connection()
             c = conn.cursor()
             c.execute(query, params)
             filtered_products = c.fetchall()
             conn.close()
+
+            # Обновляем отображение с выравниванием по левому верхнему углу
             self.display_products(filtered_products)
 
-        except ValueError:
-            QMessageBox.warning(self, "Ошибка", "Введите корректные значения цены")
         except Exception as e:
-            print(f"Ошибка применения фильтров: {e}")
+            QMessageBox.warning(self, 'Ошибка', f"Ошибка применения фильтров: {e}")
 
     def reset_filters(self):
         self.lineEdit_3.clear()
@@ -281,6 +332,8 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.lineEdit.clear()  # Очищаем поле поиска
         self.current_search_query = ""  # Сбрасываем поисковый запрос
         self.comboBox_3.setCurrentIndex(0)
+        self.comboBox.setCurrentIndex(0)  # Сбрасываем категорию на "Все категории"
+        # При сбросе фильтров также обеспечиваем выравнивание по левому верхнему углу
         self.load_products()
 
     def load_products(self):
@@ -319,8 +372,11 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         # Создаем контейнер для сетки карточек
         products_container = QtWidgets.QWidget()
         products_layout = QtWidgets.QGridLayout(products_container)
-        products_layout.setSpacing(20)  # Расстояние между карточками
+        products_layout.setSpacing(60)  # Расстояние между карточками
         products_layout.setContentsMargins(20, 20, 20, 20)  # Отступы от краев
+
+        # Ключевое изменение: выравнивание по левому верхнему углу
+        products_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
         # Определяем оптимальное количество колонок в зависимости от ширины экрана
         screen_width = QApplication.desktop().screenGeometry().width()
@@ -349,17 +405,9 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
                 col = 0
                 row += 1
 
-        # Добавляем растягивающиеся элементы для равномерного заполнения
-        # Растягиваем все колонки равномерно
-        for i in range(max_columns):
-            products_layout.setColumnStretch(i, 1)
-
-        # Растягиваем все строки равномерно
-        for i in range(row + 1):
-            products_layout.setRowStretch(i, 1)
-
         # Добавляем контейнер в scroll layout
         self.scroll_layout.addWidget(products_container)
+        self.scroll_layout.setAlignment(QtCore.Qt.AlignTop)
 
     def clear_layout(self, layout):
         """Рекурсивно очищает layout и удаляет все виджеты"""
@@ -377,7 +425,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         # Основная карточка
         card = QtWidgets.QGroupBox()
         card.setMinimumSize(200, 320)
-        card.setMaximumSize(200, 230)
+        card.setMaximumSize(200, 320)
         card.setStyleSheet("""
             QGroupBox {
                 border: 2px solid #cccccc;
@@ -1318,6 +1366,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         self.pushButton_2.clicked.connect(self.add_item)
         self.pushButton_3.clicked.connect(self.delete_item)
         self.pushButton_4.clicked.connect(self.edit_item)
+        self.pushButton_5.clicked.connect(self.export_statistics)
 
         self.create_profile_menu()
 
@@ -1732,7 +1781,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
     def load_employees_to_table(self):
         conn = get_connection()
         c = conn.cursor()
-        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM employee''')
+        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM user WHERE role = 'employee' ''')
         data = c.fetchall()
         conn.close()
 
@@ -1742,7 +1791,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
     def load_users_to_table(self):
         conn = get_connection()
         c = conn.cursor()  # Исправлено: было connect.cursor()
-        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM user''')
+        c.execute('''SELECT id, first_name, last_name, third_name, login, phone, email, address FROM user WHERE role = 'user' ''')
         data = c.fetchall()
         conn.close()
 
@@ -1842,6 +1891,16 @@ class AdminPanel(QDialog, Ui_Admin_Form):
 
     def on_tab_changed(self, index):
         """Обработчик смены вкладки"""
+        if index == 5:  # Статистика
+            self.pushButton_2.setVisible(False)  # Скрыть "Добавить"
+            self.pushButton_3.setVisible(False)  # Скрыть "Удалить"
+            self.pushButton_4.setVisible(False)  # Скрыть "Изменить"
+            self.pushButton_5.setVisible(True)  # Показать "Экспортировать"
+        else:
+            self.pushButton_2.setVisible(True)  # Показать "Добавить"
+            self.pushButton_3.setVisible(True)  # Показать "Удалить"
+            self.pushButton_4.setVisible(True)  # Показать "Изменить"
+            self.pushButton_5.setVisible(False)  # Скрыть "Экспортировать"
         try:
             if index == 0:  # Заказы
                 self.load_orders_to_table()
@@ -1853,9 +1912,269 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 self.load_employees_to_table()
             elif index == 4:  # Категории
                 self.load_categories_to_table()
+            elif index == 5: # Статистика
+                self.load_statistics_to_table()
 
         except Exception as e:
             print(f"Ошибка при смене вкладки: {e}")
+
+    def load_statistics_to_table(self):
+        """Загрузка статистики по заказам в таблицу"""
+        try:
+            conn = get_connection()
+            c = conn.cursor()
+
+            # Получаем все заказы (можно добавить фильтр по статусу если нужно)
+            c.execute('''
+                SELECT 
+                    id,
+                    user_id,
+                    date,
+                    status,
+                    sum
+                FROM user_order 
+                ORDER BY date DESC, id DESC
+            ''')
+            orders = c.fetchall()
+
+            conn.close()
+
+            self.display_orders_table(orders)
+
+        except Exception as e:
+            print(f"Ошибка загрузки статистики заказов: {e}")
+            QMessageBox.warning(self, "Ошибка", "Не удалось загрузить статистику заказов")
+
+    def display_orders_table(self, orders):
+        """Отображение заказов в таблице статистики"""
+        table_widget = self.tableWidget_3
+
+        if not orders:
+            table_widget.setRowCount(1)
+            table_widget.setColumnCount(1)
+            no_data_item = QtWidgets.QTableWidgetItem("Нет заказов для отображения")
+            no_data_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            table_widget.setItem(0, 0, no_data_item)
+            return
+
+        # Настраиваем таблицу с 6 столбцами
+        table_widget.setRowCount(len(orders))
+        table_widget.setColumnCount(6)
+
+        headers = ['ID заказа', 'ID клиента', 'Дата', 'Статус', 'Сумма (руб.)', 'Действия']
+        table_widget.setHorizontalHeaderLabels(headers)
+
+        total_revenue = 0  # ОБЩАЯ сумма всех заказов
+        completed_revenue = 0  # Сумма только ВЫПОЛНЕННЫХ заказов
+        completed_orders = 0
+
+        for row, order in enumerate(orders):
+            order_id, user_id, date, status, total_sum = order
+
+            # ID заказа
+            id_item = QTableWidgetItem(str(order_id))
+            table_widget.setItem(row, 0, id_item)
+
+            # ID клиента
+            user_item = QTableWidgetItem(str(user_id))
+            table_widget.setItem(row, 1, user_item)
+
+            # Дата
+            date_item = QTableWidgetItem(date)
+            table_widget.setItem(row, 2, date_item)
+
+            # Статус
+            status_item = QTableWidgetItem(status)
+            # Подсветка статусов разными цветами
+            if status == 'Выполнен':
+                status_item.setBackground(QtGui.QColor(200, 255, 200))  # Зеленый
+            elif status == 'Отменен':
+                status_item.setBackground(QtGui.QColor(255, 200, 200))  # Красный
+            elif status == 'Доставляется':
+                status_item.setBackground(QtGui.QColor(255, 255, 200))  # Желтый
+            table_widget.setItem(row, 3, status_item)
+
+            # Сумма
+            sum_item = QTableWidgetItem(f"{float(total_sum):.2f}")
+            sum_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            table_widget.setItem(row, 4, sum_item)
+
+            # Кнопка просмотра содержимого
+            view_button = QtWidgets.QPushButton("Просмотреть содержимое")
+            view_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 5px 10px;
+                    border-radius: 3px;
+                    font-family: 'Segoe Print';
+                    font-size: 10px;
+                    min-width: 120px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+                QPushButton:pressed {
+                    background-color: #3d8b40;
+                }
+            """)
+            view_button.clicked.connect(lambda checked, oid=order_id: self.view_order_contents(oid))
+            table_widget.setCellWidget(row, 5, view_button)
+
+            # Считаем общую статистику
+            total_revenue += float(total_sum)  # Все заказы
+            if status == 'Выполнен':
+                completed_orders += 1
+                completed_revenue += float(total_sum)  # Только выполненные заказы
+
+        # Добавляем итоговую строку
+        table_widget.setRowCount(len(orders) + 1)
+        row_final = len(orders)
+
+        # Итоговая строка
+        table_widget.setItem(row_final, 0, QTableWidgetItem("ИТОГО:"))
+        table_widget.setItem(row_final, 1, QTableWidgetItem(""))
+
+        total_orders_item = QTableWidgetItem(f"Всего заказов: {len(orders)}")
+        table_widget.setItem(row_final, 2, total_orders_item)
+
+        completed_orders_item = QTableWidgetItem(f"Выполнено: {completed_orders}")
+        table_widget.setItem(row_final, 3, completed_orders_item)
+
+        # ИЗМЕНЕНИЕ: показываем сумму только выполненных заказов вместо общей суммы
+        completed_revenue_item = QTableWidgetItem(f"{completed_revenue:.2f}")
+        completed_revenue_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        table_widget.setItem(row_final, 4, completed_revenue_item)
+
+        table_widget.setItem(row_final, 5, QTableWidgetItem(""))
+
+        # Выделяем итоговую строку
+        for col in range(table_widget.columnCount()):
+            item = table_widget.item(row_final, col)
+            if item:
+                item.setBackground(QtGui.QColor(240, 240, 240))
+                font = item.font()
+                font.setBold(True)
+                item.setFont(font)
+
+        table_widget.verticalHeader().setVisible(False)
+        table_widget.resizeColumnsToContents()
+        table_widget.horizontalHeader().setStretchLastSection(True)
+
+    def view_order_contents(self, order_id):
+        """Просмотр содержимого заказа (используем тот же диалог, что и у пользователя)"""
+        try:
+            dialog = OrderContentsDialog(self, order_id)
+            dialog.exec_()
+
+        except Exception as e:
+            print(f"Ошибка открытия диалога просмотра заказа: {e}")
+            QMessageBox.warning(self, "Ошибка", "Не удалось открыть содержимое заказа")
+
+    def export_statistics(self):
+        """Экспорт статистики по заказам в TXT файл"""
+        try:
+            # Получаем данные для экспорта
+            conn = get_connection()
+            c = conn.cursor()
+
+            # Получаем все заказы
+            c.execute('''
+                SELECT 
+                    uo.id,
+                    u.first_name || ' ' || u.last_name as customer_name,
+                    uo.date,
+                    uo.status,
+                    uo.sum
+                FROM user_order uo
+                LEFT JOIN user u ON uo.user_id = u.id
+                ORDER BY uo.date DESC, uo.id DESC
+            ''')
+            orders = c.fetchall()
+
+            # Общая статистика
+            c.execute('''
+                SELECT 
+                    COUNT(*) as total_orders,
+                    SUM(sum) as total_revenue,
+                    AVG(sum) as avg_order_value,
+                    COUNT(CASE WHEN status = 'Выполнен' THEN 1 END) as completed_orders,
+                    SUM(CASE WHEN status = 'Выполнен' THEN sum ELSE 0 END) as completed_revenue
+                FROM user_order 
+            ''')
+            overall_stats = c.fetchone()
+
+            conn.close()
+
+            self.export_orders_to_txt(orders, overall_stats)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось экспортировать статистику: {str(e)}")
+
+    def export_orders_to_txt(self, orders, overall_stats):
+        """Экспорт статистики по заказам в TXT файл"""
+        try:
+            file_name, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self,
+                "Экспорт статистики заказов",
+                f"статистика_заказов_{QtCore.QDate.currentDate().toString('yyyy-MM-dd')}.txt",
+                "Text Files (*.txt)"
+            )
+
+            if not file_name:
+                return
+
+            with open(file_name, 'w', encoding='utf-8') as file:
+                file.write("=" * 70 + "\n")
+                file.write("СТАТИСТИКА ЗАКАЗОВ МАГАЗИНА БЫТОВОЙ ТЕХНИКИ\n")
+                file.write("=" * 70 + "\n")
+                file.write(f"Отчет сгенерирован: {QtCore.QDateTime.currentDateTime().toString('dd.MM.yyyy HH:mm')}\n\n")
+
+                # Общая статистика
+                if overall_stats:
+                    total_orders, total_revenue, avg_order, completed_orders, completed_revenue = overall_stats
+                    file.write("ОБЩАЯ СТАТИСТИКА ПО ЗАКАЗАМ:\n")
+                    file.write("-" * 50 + "\n")
+                    file.write(f"Всего заказов: {total_orders or 0}\n")
+                    file.write(f"Выполненных заказов: {completed_orders or 0}\n")
+                    file.write(f"Общая сумма всех заказов: {float(total_revenue or 0):.2f} руб.\n")
+                    file.write(f"Сумма выполненных заказов: {float(completed_revenue or 0):.2f} руб.\n")
+                    file.write(f"Средний чек: {float(avg_order or 0):.2f} руб.\n")
+                    file.write("\n")
+
+                # Детальная статистика по заказам
+                file.write("ДЕТАЛЬНАЯ СТАТИСТИКА ПО ЗАКАЗАМ:\n")
+                file.write("-" * 90 + "\n")
+                file.write(f"{'ID':<6} {'Клиент':<20} {'Дата':<12} {'Статус':<12} {'Сумма':<10}\n")
+                file.write("-" * 90 + "\n")
+
+                total_all_revenue = 0
+                total_completed_revenue = 0
+
+                for order in orders:
+                    order_id, customer_name, date, status, total_sum = order
+                    # Обрезаем длинные имена
+                    customer_display = str(customer_name or f"Клиент #{order_id}")[:19]
+                    date_display = str(date)[:10]
+                    status_display = str(status)[:11]
+
+                    file.write(
+                        f"{order_id:<6} {customer_display:<20} {date_display:<12} {status_display:<12} {float(total_sum):<10.2f}\n")
+
+                    total_all_revenue += float(total_sum)
+                    if status == 'Выполнен':
+                        total_completed_revenue += float(total_sum)
+
+                file.write("-" * 90 + "\n")
+                file.write(f"{'ИТОГО:':<6} {'':<20} {'':<12} {'Всего:':<12} {total_all_revenue:<10.2f}\n")
+                file.write(f"{'':<6} {'':<20} {'':<12} {'Выполнено:':<12} {total_completed_revenue:<10.2f}\n")
+                file.write("=" * 70 + "\n")
+
+            QMessageBox.information(self, "Успех", f"Статистика заказов экспортирована в файл:\n{file_name}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось экспортировать статистику: {str(e)}")
 
 class AddProductDialog(QDialog, Ui_AddProductDialog):
     def __init__(self, parent=None):
@@ -2159,7 +2478,7 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
             if existing_user[1] == login:
                 QMessageBox.warning(self, "Ошибка",
                                     "Пользователь с такими логином уже существует!")
-            if existing_user[2] == phone:
+            elif existing_user[2] == phone:
                 QMessageBox.warning(self, "Ошибка",
                                     "Пользователь с такими номером уже существует!")
                 self.lineEdit_phone.clear()
@@ -2225,7 +2544,7 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
             if existing_user[1] == login:
                 QMessageBox.warning(self, "Ошибка",
                                     "Пользователь с такими логином уже существует!")
-            if existing_user[2] == phone:
+            elif existing_user[2] == phone:
                 QMessageBox.warning(self, "Ошибка",
                                     "Пользователь с такими номером уже существует!")
                 self.lineEdit_phone.clear()
@@ -2261,8 +2580,8 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
         name = self.lineEdit_name.text().strip().capitalize()
         description = self.textEdit_description.toPlainText().strip().capitalize()
 
-        if not name or not description:
-            QMessageBox.warning(self, "Ошибка", "Введите данные для добавления категории")
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Введите данные название категории")
             return
 
         conn = get_connection()
@@ -2496,7 +2815,7 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         try:
             c.execute('''UPDATE user SET first_name=?, last_name=?, third_name=?, 
                         phone=?, email=?, address=?
-                        WHERE id=?''',
+                        WHERE role = 'user' ''',
                       (first_name, last_name, third_name, phone, email, address, self.user_id))
             conn.commit()
             QMessageBox.information(self, "Успех", "Пользователь успешно обновлен")
@@ -2523,9 +2842,8 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute(
-                "SELECT first_name, last_name, third_name, phone, email, address FROM employee WHERE id = ?",
-                (self.employee_id,))
+            c.execute('''SELECT first_name, last_name, third_name, phone, email, address FROM user WHERE id = ? AND role = 'employee' ''',
+                      self.employee_id)
             employee_data = c.fetchone()
 
             if employee_data:
@@ -2537,7 +2855,7 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
                 self.lineEdit_address.setText(employee_data[5] or "")
 
         except Exception as e:
-            print(f"Ошибка загрузки данных сотрудника: {e}")
+            QMessageBox.critical(self, 'Ошибка!', f"Ошибка загрузки данных сотрудника: {e}")
         finally:
             conn.close()
 
@@ -2568,9 +2886,9 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute('''UPDATE employee SET first_name=?, last_name=?, third_name=?, 
+            c.execute('''UPDATE user SET first_name=?, last_name=?, third_name=?, 
                         phone=?, email=?, address=?
-                        WHERE id=?''',
+                        WHERE id = ? ''',
                       (first_name, last_name, third_name, phone, email, address, self.employee_id))
             conn.commit()
             QMessageBox.information(self, "Успех", "Сотрудник успешно обновлен")

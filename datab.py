@@ -1,4 +1,5 @@
 import sqlite3
+import hashlib
 
 connect = sqlite3.connect('database.db')
 c = connect.cursor()
@@ -68,8 +69,12 @@ CREATE TABLE IF NOT EXISTS cart_item (
     FOREIGN KEY (cart_id) REFERENCES cart (id),
     FOREIGN KEY (product_id) REFERENCES product (id))
 ''')
-c.execute('''SELECT * FROM user''')
-result = c.fetchall()
-for i in result:
+
+password = hashlib.sha256('1234'.encode()).hexdigest()
+c.execute('''INSERT OR IGNORE INTO user (first_name, last_name, third_name, login, password, phone, email, address, role)
+             VALUES ('Артём','Баймухомедов','Владиславович','admin',?,'+7 (926) 286-72-45','lirthu777@gmail.com','Moscow','employee')''', (password,))
+c.execute('''select * from user''')
+res = c.fetchall()
+for i in res:
     print(dict(i))
 connect.commit()

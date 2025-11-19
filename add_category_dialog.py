@@ -53,7 +53,7 @@ class Ui_AddCategoryDialog(object):
 
         self.textEdit_description = QTextEdit(AddCategoryDialog)
         self.textEdit_description.setObjectName("textEdit_description")
-        self.textEdit_description.setPlaceholderText("Введите описание категории")
+        self.textEdit_description.setPlaceholderText("Введите описание категории (необязательно)")
         self.textEdit_description.setMaximumHeight(120)
         self.formLayout.addWidget(self.textEdit_description)
 

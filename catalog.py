@@ -100,12 +100,29 @@ class Ui_Catalog_Form(object):
 "QComboBox QAbstractItemView {\n"
 "    background-color: white;\n"
 "    border: 1px solid gray;\n"
-"}к")
+"}")
         self.comboBox_3.setObjectName("comboBox_3")
         self.comboBox_3.addItem("")
         self.comboBox_3.addItem("")
         self.comboBox_3.addItem("")
         self.verticalLayout_4.addWidget(self.comboBox_3)
+        self.comboBox = QtWidgets.QComboBox(Form)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(11)
+        self.comboBox.setFont(font)
+        self.comboBox.setStyleSheet("QComboBox {\n"
+"    background-color: transparent;\n"
+"}\n"
+"\n"
+"QComboBox QAbstractItemView {\n"
+"    background-color: white;\n"
+"    border: 1px solid gray;\n"
+"}")
+        self.comboBox.setEditable(False)
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox.addItem("")
+        self.verticalLayout_4.addWidget(self.comboBox)
         self.label_2 = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
@@ -172,6 +189,8 @@ class Ui_Catalog_Form(object):
         self.comboBox_3.setItemText(0, _translate("Form", "Сортировать"))
         self.comboBox_3.setItemText(1, _translate("Form", "От А до Я"))
         self.comboBox_3.setItemText(2, _translate("Form", "От Я до А"))
+        self.comboBox.setCurrentText(_translate("Form", "Все категории"))
+        self.comboBox.setItemText(0, _translate("Form", "Все категории"))
         self.label_2.setText(_translate("Form", "Цена"))
         self.label_3.setText(_translate("Form", "От"))
         self.label_4.setText(_translate("Form", "До"))

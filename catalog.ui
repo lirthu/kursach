@@ -144,7 +144,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0,0,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0,0,0,0,0">
        <property name="spacing">
         <number>6</number>
        </property>
@@ -164,7 +164,7 @@
 QComboBox QAbstractItemView {
     background-color: white;
     border: 1px solid gray;
-}к</string>
+}</string>
          </property>
          <item>
           <property name="text">
@@ -179,6 +179,37 @@ QComboBox QAbstractItemView {
          <item>
           <property name="text">
            <string extracomment="23к2к23">От Я до А</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox">
+         <property name="font">
+          <font>
+           <family>Segoe Print</family>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QComboBox {
+    background-color: transparent;
+}
+
+QComboBox QAbstractItemView {
+    background-color: white;
+    border: 1px solid gray;
+}</string>
+         </property>
+         <property name="editable">
+          <bool>false</bool>
+         </property>
+         <property name="currentText">
+          <string>Категории</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>Категории</string>
           </property>
          </item>
         </widget>
