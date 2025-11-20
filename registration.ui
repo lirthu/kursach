@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>450</height>
+    <width>521</width>
+    <height>469</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Регистрация</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #ECF0F1;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -20,10 +23,15 @@
       <font>
        <family>Segoe Print</family>
        <pointsize>16</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
      </property>
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: #2C3E50; </string>
      </property>
      <property name="text">
       <string>Регистрация</string>
@@ -52,6 +60,9 @@
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
+       </property>
        <property name="text">
         <string>Повторите пароль</string>
        </property>
@@ -67,6 +78,9 @@
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
        </property>
        <property name="text">
         <string>Телефон</string>
@@ -84,6 +98,9 @@
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
+       </property>
        <property name="text">
         <string>Почта</string>
        </property>
@@ -99,6 +116,9 @@
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
        </property>
        <property name="text">
         <string>Имя</string>
@@ -116,6 +136,9 @@
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
+       </property>
        <property name="text">
         <string>Адрес</string>
        </property>
@@ -131,6 +154,9 @@
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
        </property>
        <property name="text">
         <string>Логин</string>
@@ -148,6 +174,9 @@
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
+       </property>
        <property name="text">
         <string>Пароль</string>
        </property>
@@ -164,6 +193,9 @@
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
        </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
+       </property>
        <property name="text">
         <string>Отчество</string>
        </property>
@@ -179,6 +211,9 @@
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50;</string>
        </property>
        <property name="text">
         <string>Фамилия</string>
@@ -202,6 +237,17 @@
        </item>
        <item>
         <widget class="QCheckBox" name="checkBox">
+         <property name="styleSheet">
+          <string notr="true">QCheckBox {
+    color: #2C3E50;
+    spacing: 5px;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+</string>
+         </property>
          <property name="text">
           <string>Показать пароль</string>
          </property>
@@ -210,28 +256,131 @@
       </layout>
      </item>
      <item row="4" column="2">
-      <widget class="QLineEdit" name="lineEdit_3"/>
+      <widget class="QLineEdit" name="lineEdit_3">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="3" column="2">
-      <widget class="QLineEdit" name="lineEdit_2"/>
+      <widget class="QLineEdit" name="lineEdit_2">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEdit_1"/>
+      <widget class="QLineEdit" name="lineEdit_1">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="5" column="2">
-      <widget class="QLineEdit" name="lineEdit_4"/>
+      <widget class="QLineEdit" name="lineEdit_4">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="6" column="2">
-      <widget class="QLineEdit" name="lineEdit_9"/>
+      <widget class="QLineEdit" name="lineEdit_9">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="7" column="2">
-      <widget class="QLineEdit" name="lineEdit_10"/>
+      <widget class="QLineEdit" name="lineEdit_10">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
+      </widget>
      </item>
      <item row="8" column="2">
       <widget class="QLineEdit" name="lineEdit_11">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -239,6 +388,18 @@
      </item>
      <item row="9" column="2">
       <widget class="QLineEdit" name="lineEdit_12">
+       <property name="styleSheet">
+        <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 2px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+       </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -264,7 +425,17 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
        </property>
        <property name="text">
         <string>Создать аккаунт</string>
@@ -281,7 +452,17 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
        </property>
        <property name="text">
         <string>У меня уже есть аккаунт</string>

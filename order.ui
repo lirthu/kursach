@@ -7,11 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>1080</width>
-    <height>720</height>
+    <height>719</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Заказы</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #ECF0F1;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -25,10 +28,16 @@
         <font>
          <family>Segoe Print</family>
          <pointsize>16</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50; 
+</string>
        </property>
        <property name="text">
         <string>Заказы</string>
@@ -68,7 +77,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>корзина.png</normaloff>корзина.png</iconset>
+         <normaloff>png/корзина.png</normaloff>png/корзина.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -95,7 +104,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>профиль.png</normaloff>профиль.png</iconset>
+         <normaloff>png/профиль.png</normaloff>png/профиль.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -109,6 +118,20 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tableWidget">
+     <property name="styleSheet">
+      <string notr="true">QTableWidget {
+    background-color: white;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    gridline-color: #ECF0F1;
+}
+QHeaderView::section {
+    background-color: #2C3E50;
+    color: white;
+    padding: 6px;
+    border: none;
+}</string>
+     </property>
      <column>
       <property name="text">
        <string>Номер</string>
@@ -146,6 +169,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -167,7 +193,17 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 2px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
        </property>
        <property name="text">
         <string>Назад</string>

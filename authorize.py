@@ -15,14 +15,19 @@ class Ui_Auth_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(450, 400)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.gridLayout_2 = QtWidgets.QGridLayout(Form)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.label_10 = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_10.setFont(font)
         self.label_10.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_10.setStyleSheet("color: #2C3E50; \n"
+                                    "")
         self.label_10.setAlignment(QtCore.Qt.AlignCenter)
         self.label_10.setObjectName("label_10")
         self.gridLayout_2.addWidget(self.label_10, 0, 0, 1, 1)
@@ -30,6 +35,8 @@ class Ui_Auth_Form(object):
         self.gridLayout.setContentsMargins(-1, -1, 15, -1)
         self.gridLayout.setHorizontalSpacing(15)
         self.gridLayout.setObjectName("gridLayout")
+
+        # Сначала lineEdit (логин)
         self.lineEdit = QtWidgets.QLineEdit(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
@@ -37,11 +44,22 @@ class Ui_Auth_Form(object):
         font.setBold(False)
         font.setWeight(50)
         self.lineEdit.setFont(font)
-        self.lineEdit.setStyleSheet("")
+        self.lineEdit.setStyleSheet("QLineEdit {\n"
+                                    "    background-color: white;\n"
+                                    "    border: 2px solid #BDC3C7;\n"
+                                    "    border-radius: 4px;\n"
+                                    "    padding: 2px;\n"
+                                    "    color: #2C3E50;\n"
+                                    "}\n"
+                                    "QLineEdit:focus {\n"
+                                    "    border-color: #3498DB;\n"
+                                    "}")
         self.lineEdit.setText("")
         self.lineEdit.setPlaceholderText("")
         self.lineEdit.setObjectName("lineEdit")
         self.gridLayout.addWidget(self.lineEdit, 0, 1, 1, 1)
+
+        # Потом lineEdit_2 (пароль)
         self.lineEdit_2 = QtWidgets.QLineEdit(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
@@ -49,16 +67,28 @@ class Ui_Auth_Form(object):
         font.setBold(False)
         font.setWeight(50)
         self.lineEdit_2.setFont(font)
+        self.lineEdit_2.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
         self.lineEdit_2.setText("")
         self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.gridLayout.addWidget(self.lineEdit_2, 1, 1, 1, 1)
+
         self.label_3 = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
         self.label_3.setFont(font)
         self.label_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_3.setStyleSheet("color: #2C3E50;")
         self.label_3.setObjectName("label_3")
         self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
         self.label_2 = QtWidgets.QLabel(Form)
@@ -67,6 +97,7 @@ class Ui_Auth_Form(object):
         font.setPointSize(16)
         self.label_2.setFont(font)
         self.label_2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_2.setStyleSheet("color: #2C3E50;")
         self.label_2.setObjectName("label_2")
         self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -74,13 +105,22 @@ class Ui_Auth_Form(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.checkBox = QtWidgets.QCheckBox(Form)
+        self.checkBox.setStyleSheet("QCheckBox {\n"
+                                    "    color: #2C3E50;\n"
+                                    "    spacing: 5px;\n"
+                                    "}\n"
+                                    "QCheckBox::indicator {\n"
+                                    "    width: 16px;\n"
+                                    "    height: 16px;\n"
+                                    "}\n"
+                                    "")
         self.checkBox.setObjectName("checkBox")
         self.horizontalLayout.addWidget(self.checkBox)
         self.gridLayout.addLayout(self.horizontalLayout, 2, 1, 1, 1)
         self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_4.setContentsMargins(-1, 9, -1, -1)
-        self.verticalLayout_4.setSpacing(0)
+        self.verticalLayout_4.setContentsMargins(100, 9, 100, -1)
+        self.verticalLayout_4.setSpacing(10)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.pushButton = QtWidgets.QPushButton(Form)
         font = QtGui.QFont()
@@ -90,25 +130,36 @@ class Ui_Auth_Form(object):
         font.setUnderline(True)
         font.setWeight(50)
         self.pushButton.setFont(font)
-        self.pushButton.setStyleSheet("background-color: transparent")
+        self.pushButton.setStyleSheet("QPushButton {\n"
+                                      "    background-color: transparent;\n"
+                                      "    color: #3498DB;\n"
+                                      "    border: 1px solid #3498DB;\n"
+                                      "    padding: 8px 16px;\n"
+                                      "    border-radius: 5px;\n"
+                                      "}\n"
+                                      "QPushButton:hover {\n"
+                                      "    background-color: #3498DB;\n"
+                                      "    color: white;\n"
+                                      "}")
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_4.addWidget(self.pushButton)
-        self.label_4 = QtWidgets.QLabel(Form)
-        font = QtGui.QFont()
-        font.setFamily("Segoe Print")
-        font.setPointSize(16)
-        self.label_4.setFont(font)
-        self.label_4.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_4.setObjectName("label_4")
-        self.verticalLayout_4.addWidget(self.label_4)
         self.pushButton_2 = QtWidgets.QPushButton(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(10)
         font.setUnderline(True)
         self.pushButton_2.setFont(font)
-        self.pushButton_2.setStyleSheet("background-color: transparent")
+        self.pushButton_2.setStyleSheet("QPushButton {\n"
+                                        "    background-color: transparent;\n"
+                                        "    color: #3498DB;\n"
+                                        "    border: 1px solid #3498DB;\n"
+                                        "    padding: 8px 16px;\n"
+                                        "    border-radius: 5px;\n"
+                                        "}\n"
+                                        "QPushButton:hover {\n"
+                                        "    background-color: #3498DB;\n"
+                                        "    color: white;\n"
+                                        "}")
         self.pushButton_2.setObjectName("pushButton_2")
         self.verticalLayout_4.addWidget(self.pushButton_2)
         self.gridLayout_2.addLayout(self.verticalLayout_4, 2, 0, 1, 1)
@@ -124,5 +175,4 @@ class Ui_Auth_Form(object):
         self.label_2.setText(_translate("Form", "Логин"))
         self.checkBox.setText(_translate("Form", "Показать пароль"))
         self.pushButton.setText(_translate("Form", "Войти"))
-        self.label_4.setText(_translate("Form", "Нет аккаунта?"))
         self.pushButton_2.setText(_translate("Form", "Зарегистрироваться"))

@@ -7,6 +7,7 @@ class Ui_AddCategoryDialog(object):
     def setupUi(self, AddCategoryDialog):
         AddCategoryDialog.setObjectName("AddCategoryDialog")
         AddCategoryDialog.resize(500, 400)
+        AddCategoryDialog.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QVBoxLayout(AddCategoryDialog)
         self.verticalLayout.setObjectName("verticalLayout")
 
@@ -18,6 +19,7 @@ class Ui_AddCategoryDialog(object):
         font.setPointSize(16)
         font.setBold(True)
         self.label_title.setFont(font)
+        self.label_title.setStyleSheet("color: #2C3E50;")
         self.label_title.setObjectName("label_title")
         self.verticalLayout.addWidget(self.label_title)
 
@@ -25,6 +27,7 @@ class Ui_AddCategoryDialog(object):
         self.line = QFrame(AddCategoryDialog)
         self.line.setFrameShape(QFrame.HLine)
         self.line.setFrameShadow(QFrame.Sunken)
+        self.line.setStyleSheet("color: #BDC3C7;")
         self.line.setObjectName("line")
         self.verticalLayout.addWidget(self.line)
 
@@ -34,12 +37,28 @@ class Ui_AddCategoryDialog(object):
 
         # Название категории
         self.label_name = QLabel(AddCategoryDialog)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(12)
+        self.label_name.setFont(font)
+        self.label_name.setStyleSheet("color: #2C3E50;")
         self.label_name.setObjectName("label_name")
         self.formLayout.addWidget(self.label_name)
 
         self.lineEdit_name = QLineEdit(AddCategoryDialog)
         self.lineEdit_name.setObjectName("lineEdit_name")
         self.lineEdit_name.setPlaceholderText("Введите название категории")
+        self.lineEdit_name.setStyleSheet("QLineEdit {\n"
+                                         "    background-color: white;\n"
+                                         "    border: 2px solid #BDC3C7;\n"
+                                         "    border-radius: 4px;\n"
+                                         "    padding: 8px;\n"
+                                         "    color: #2C3E50;\n"
+                                         "    font-family: 'Segoe Print';\n"
+                                         "}\n"
+                                         "QLineEdit:focus {\n"
+                                         "    border-color: #3498DB;\n"
+                                         "}")
         self.formLayout.addWidget(self.lineEdit_name)
 
         # Добавляем отступ между полями
@@ -48,6 +67,11 @@ class Ui_AddCategoryDialog(object):
 
         # Описание категории
         self.label_description = QLabel(AddCategoryDialog)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(12)
+        self.label_description.setFont(font)
+        self.label_description.setStyleSheet("color: #2C3E50;")
         self.label_description.setObjectName("label_description")
         self.formLayout.addWidget(self.label_description)
 
@@ -55,6 +79,17 @@ class Ui_AddCategoryDialog(object):
         self.textEdit_description.setObjectName("textEdit_description")
         self.textEdit_description.setPlaceholderText("Введите описание категории (необязательно)")
         self.textEdit_description.setMaximumHeight(120)
+        self.textEdit_description.setStyleSheet("QTextEdit {\n"
+                                               "    background-color: white;\n"
+                                               "    border: 2px solid #BDC3C7;\n"
+                                               "    border-radius: 4px;\n"
+                                               "    padding: 8px;\n"
+                                               "    color: #2C3E50;\n"
+                                               "    font-family: 'Segoe Print';\n"
+                                               "}\n"
+                                               "QTextEdit:focus {\n"
+                                               "    border-color: #3498DB;\n"
+                                               "}")
         self.formLayout.addWidget(self.textEdit_description)
 
         self.verticalLayout.addLayout(self.formLayout)
@@ -73,10 +108,34 @@ class Ui_AddCategoryDialog(object):
 
         self.pushButton_cancel = QPushButton(AddCategoryDialog)
         self.pushButton_cancel.setObjectName("pushButton_cancel")
+        self.pushButton_cancel.setStyleSheet("QPushButton {\n"
+                                            "    background-color: transparent;\n"
+                                            "    color: #E74C3C;\n"
+                                            "    border: 1px solid #E74C3C;\n"
+                                            "    padding: 8px 16px;\n"
+                                            "    border-radius: 5px;\n"
+                                            "    font-family: 'Segoe Print';\n"
+                                            "}\n"
+                                            "QPushButton:hover {\n"
+                                            "    background-color: #E74C3C;\n"
+                                            "    color: white;\n"
+                                            "}")
         self.horizontalLayout_buttons.addWidget(self.pushButton_cancel)
 
         self.pushButton_save = QPushButton(AddCategoryDialog)
         self.pushButton_save.setObjectName("pushButton_save")
+        self.pushButton_save.setStyleSheet("QPushButton {\n"
+                                          "    background-color: transparent;\n"
+                                          "    color: #3498DB;\n"
+                                          "    border: 1px solid #3498DB;\n"
+                                          "    padding: 8px 16px;\n"
+                                          "    border-radius: 5px;\n"
+                                          "    font-family: 'Segoe Print';\n"
+                                          "}\n"
+                                          "QPushButton:hover {\n"
+                                          "    background-color: #3498DB;\n"
+                                          "    color: white;\n"
+                                          "}")
         self.horizontalLayout_buttons.addWidget(self.pushButton_save)
 
         self.verticalLayout.addLayout(self.horizontalLayout_buttons)

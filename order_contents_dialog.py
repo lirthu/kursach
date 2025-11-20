@@ -8,6 +8,7 @@ class Ui_OrderContentsDialog(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 500)
         Dialog.setMinimumSize(QtCore.QSize(600, 400))
+        Dialog.setStyleSheet("background-color: #ECF0F1;")
 
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -19,10 +20,11 @@ class Ui_OrderContentsDialog(object):
         self.label_order_info = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
-        font.setPointSize(12)
+        font.setPointSize(16)
         font.setBold(True)
         font.setWeight(75)
         self.label_order_info.setFont(font)
+        self.label_order_info.setStyleSheet("color: #2C3E50;")
         self.label_order_info.setObjectName("label_order_info")
         self.horizontalLayout.addWidget(self.label_order_info)
 
@@ -41,7 +43,19 @@ class Ui_OrderContentsDialog(object):
         self.tableWidget_products.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget_products.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget_products.setAlternatingRowColors(True)
-
+        self.tableWidget_products.setStyleSheet("QTableWidget {\n"
+"    background-color: white;\n"
+"    border: 1px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    gridline-color: #ECF0F1;\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: #2C3E50;\n"
+"    color: white;\n"
+"    padding: 6px;\n"
+"    border: none;\n"
+"    font-family: 'Segoe Print';\n"
+"}")
         self.verticalLayout.addWidget(self.tableWidget_products)
 
         # Итоговая сумма
@@ -54,10 +68,11 @@ class Ui_OrderContentsDialog(object):
         self.label_total = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
-        font.setPointSize(11)
+        font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.label_total.setFont(font)
+        self.label_total.setStyleSheet("color: #2C3E50;")
         self.label_total.setObjectName("label_total")
         self.horizontalLayout_2.addWidget(self.label_total)
 
@@ -73,8 +88,20 @@ class Ui_OrderContentsDialog(object):
         self.pushButton_close = QtWidgets.QPushButton(Dialog)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
-        font.setPointSize(10)
+        font.setPointSize(11)
+        font.setUnderline(False)
         self.pushButton_close.setFont(font)
+        self.pushButton_close.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_close.setObjectName("pushButton_close")
         self.horizontalLayout_3.addWidget(self.pushButton_close)
 

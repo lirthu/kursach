@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Catalog_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(1107, 817)
+        Form.resize(1107, 584)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout = QtWidgets.QGridLayout()
@@ -23,6 +24,16 @@ class Ui_Catalog_Form(object):
         self.horizontalLayout.setSpacing(30)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.lineEdit = QtWidgets.QLineEdit(Form)
+        self.lineEdit.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 6px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit.setObjectName("lineEdit")
         self.horizontalLayout.addWidget(self.lineEdit)
         self.pushButton_3 = QtWidgets.QPushButton(Form)
@@ -34,7 +45,7 @@ class Ui_Catalog_Form(object):
         self.pushButton_3.setStyleSheet("background-color: transparent")
         self.pushButton_3.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("поиск.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("png/поиск.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_3.setIcon(icon)
         self.pushButton_3.setIconSize(QtCore.QSize(24, 24))
         self.pushButton_3.setObjectName("pushButton_3")
@@ -49,7 +60,7 @@ class Ui_Catalog_Form(object):
         self.pushButton_2.setStyleSheet("background-color: transparent")
         self.pushButton_2.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("png/корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -63,17 +74,22 @@ class Ui_Catalog_Form(object):
         self.pushButton.setStyleSheet("background-color: transparent")
         self.pushButton.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("png/профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton.setIcon(icon2)
         self.pushButton.setIconSize(QtCore.QSize(36, 36))
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 1, 1, 1)
         self.scrollArea = QtWidgets.QScrollArea(Form)
+        self.scrollArea.setStyleSheet("QScrollArea {\n"
+"    background-color: white;\n"
+"    border: 1px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"}")
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 884, 731))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 858, 498))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
         self.gridLayout.addWidget(self.scrollArea, 1, 1, 1, 1)
@@ -81,8 +97,12 @@ class Ui_Catalog_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_5.setFont(font)
         self.label_5.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_5.setStyleSheet("color: #2C3E50; \n"
+"")
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
@@ -94,12 +114,18 @@ class Ui_Catalog_Form(object):
         font.setPointSize(11)
         self.comboBox_3.setFont(font)
         self.comboBox_3.setStyleSheet("QComboBox {\n"
-"    background-color: transparent;\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 6px;\n"
+"    color: #2C3E50;\n"
 "}\n"
-"\n"
+"QComboBox::drop-down {\n"
+"    border: none;\n"
+"}\n"
 "QComboBox QAbstractItemView {\n"
 "    background-color: white;\n"
-"    border: 1px solid gray;\n"
+"    border: 1px solid #BDC3C7;\n"
 "}")
         self.comboBox_3.setObjectName("comboBox_3")
         self.comboBox_3.addItem("")
@@ -112,12 +138,18 @@ class Ui_Catalog_Form(object):
         font.setPointSize(11)
         self.comboBox.setFont(font)
         self.comboBox.setStyleSheet("QComboBox {\n"
-"    background-color: transparent;\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 6px;\n"
+"    color: #2C3E50;\n"
 "}\n"
-"\n"
+"QComboBox::drop-down {\n"
+"    border: none;\n"
+"}\n"
 "QComboBox QAbstractItemView {\n"
 "    background-color: white;\n"
-"    border: 1px solid gray;\n"
+"    border: 1px solid #BDC3C7;\n"
 "}")
         self.comboBox.setEditable(False)
         self.comboBox.setObjectName("comboBox")
@@ -129,6 +161,7 @@ class Ui_Catalog_Form(object):
         font.setPointSize(12)
         self.label_2.setFont(font)
         self.label_2.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_2.setStyleSheet("color: #2C3E50;")
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.verticalLayout_4.addWidget(self.label_2)
@@ -138,6 +171,7 @@ class Ui_Catalog_Form(object):
         font.setPointSize(12)
         self.label_3.setFont(font)
         self.label_3.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_3.setStyleSheet("color: #2C3E50;")
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
         self.verticalLayout_4.addWidget(self.label_3)
@@ -150,6 +184,7 @@ class Ui_Catalog_Form(object):
         font.setPointSize(12)
         self.label_4.setFont(font)
         self.label_4.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_4.setStyleSheet("color: #2C3E50;")
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label_4")
         self.verticalLayout_4.addWidget(self.label_4)
@@ -161,7 +196,17 @@ class Ui_Catalog_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.pushButton_7.setFont(font)
-        self.pushButton_7.setStyleSheet("background-color: transparent;")
+        self.pushButton_7.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 2px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_7.setObjectName("pushButton_7")
         self.verticalLayout_4.addWidget(self.pushButton_7)
         self.pushButton_8 = QtWidgets.QPushButton(Form)
@@ -169,7 +214,17 @@ class Ui_Catalog_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.pushButton_8.setFont(font)
-        self.pushButton_8.setStyleSheet("background-color: transparent;")
+        self.pushButton_8.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 2px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_8.setObjectName("pushButton_8")
         self.verticalLayout_4.addWidget(self.pushButton_8)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -184,13 +239,13 @@ class Ui_Catalog_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Каталог"))
         self.label_5.setText(_translate("Form", "Каталог"))
         self.comboBox_3.setItemText(0, _translate("Form", "Сортировать"))
         self.comboBox_3.setItemText(1, _translate("Form", "От А до Я"))
         self.comboBox_3.setItemText(2, _translate("Form", "От Я до А"))
-        self.comboBox.setCurrentText(_translate("Form", "Все категории"))
-        self.comboBox.setItemText(0, _translate("Form", "Все категории"))
+        self.comboBox.setCurrentText(_translate("Form", "Категории"))
+        self.comboBox.setItemText(0, _translate("Form", "Категории"))
         self.label_2.setText(_translate("Form", "Цена"))
         self.label_3.setText(_translate("Form", "От"))
         self.label_4.setText(_translate("Form", "До"))

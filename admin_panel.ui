@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Панель управления</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #ECF0F1;</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -22,10 +25,16 @@
         <font>
          <family>Segoe Print</family>
          <pointsize>16</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50; 
+</string>
        </property>
        <property name="text">
         <string>Управление магазином</string>
@@ -51,10 +60,13 @@
         <font>
          <family>Segoe Print</family>
          <pointsize>16</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color: transparent</string>
+        <string notr="true">color: #2C3E50; 
+background-color: transparent</string>
        </property>
        <property name="text">
         <string>Профиль</string>
@@ -72,7 +84,20 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">font: 12pt &quot;Segoe Print&quot;;
+      <string notr="true">QTabWidget::pane {
+    border: 1px solid #BDC3C7;
+    background-color: white;
+}
+QTabBar::tab {
+    background-color: #ECF0F1;
+    color: #2C3E50;
+    padding: 8px 16px;
+    margin-right: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #2C3E50;
+    color: white;
+}
 </string>
      </property>
      <property name="currentIndex">
@@ -134,10 +159,38 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QTableWidget" name="tableWidget_3"/>
+        <widget class="QTableWidget" name="tableWidget_3">
+         <property name="styleSheet">
+          <string notr="true">QTableWidget {
+    background-color: white;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    gridline-color: #ECF0F1;
+}
+QHeaderView::section {
+    background-color: #2C3E50;
+    color: white;
+    padding: 6px;
+    border: none;
+}</string>
+         </property>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QPushButton" name="pushButton_5">
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
+         </property>
          <property name="text">
           <string>Экспортировать</string>
          </property>
@@ -151,6 +204,25 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QPushButton" name="pushButton_2">
+       <property name="font">
+        <font>
+         <family>Segoe Print</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
+       </property>
        <property name="text">
         <string>Добавить</string>
        </property>
@@ -158,6 +230,25 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_4">
+       <property name="font">
+        <font>
+         <family>Segoe Print</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
+       </property>
        <property name="text">
         <string>Изменить</string>
        </property>
@@ -165,6 +256,25 @@
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_3">
+       <property name="font">
+        <font>
+         <family>Segoe Print</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
+       </property>
        <property name="text">
         <string>Удалить</string>
        </property>

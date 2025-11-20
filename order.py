@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Order_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(1080, 720)
+        Form.resize(1080, 719)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -24,8 +25,12 @@ class Ui_Order_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_5.setFont(font)
         self.label_5.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_5.setStyleSheet("color: #2C3E50; \n"
+"")
         self.label_5.setObjectName("label_5")
         self.horizontalLayout.addWidget(self.label_5)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -40,7 +45,7 @@ class Ui_Order_Form(object):
         self.pushButton_2.setStyleSheet("background-color: transparent")
         self.pushButton_2.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("png/корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -54,13 +59,25 @@ class Ui_Order_Form(object):
         self.pushButton.setStyleSheet("background-color: transparent")
         self.pushButton.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("png/профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton.setIcon(icon1)
         self.pushButton.setIconSize(QtCore.QSize(36, 36))
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.tableWidget = QtWidgets.QTableWidget(Form)
+        self.tableWidget.setStyleSheet("QTableWidget {\n"
+"    background-color: white;\n"
+"    border: 1px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    gridline-color: #ECF0F1;\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: #2C3E50;\n"
+"    color: white;\n"
+"    padding: 6px;\n"
+"    border: none;\n"
+"}")
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(0)
@@ -87,7 +104,17 @@ class Ui_Order_Form(object):
         font.setUnderline(False)
         self.pushButton_6.setFont(font)
         self.pushButton_6.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.pushButton_6.setStyleSheet("background-color: transparent")
+        self.pushButton_6.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 2px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_6.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_6.setObjectName("pushButton_6")
         self.horizontalLayout_3.addWidget(self.pushButton_6)

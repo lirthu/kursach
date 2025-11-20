@@ -15,6 +15,7 @@ class Ui_Admin_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1080, 720)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -23,8 +24,12 @@ class Ui_Admin_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
         self.label.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label.setStyleSheet("color: #2C3E50; \n"
+"")
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -33,8 +38,11 @@ class Ui_Admin_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.pushButton.setFont(font)
-        self.pushButton.setStyleSheet("background-color: transparent")
+        self.pushButton.setStyleSheet("color: #2C3E50; \n"
+"background-color: transparent")
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -43,7 +51,20 @@ class Ui_Admin_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.tabWidget.setFont(font)
-        self.tabWidget.setStyleSheet("font: 12pt \"Segoe Print\";\n"
+        self.tabWidget.setStyleSheet("QTabWidget::pane {\n"
+"    border: 1px solid #BDC3C7;\n"
+"    background-color: white;\n"
+"}\n"
+"QTabBar::tab {\n"
+"    background-color: #ECF0F1;\n"
+"    color: #2C3E50;\n"
+"    padding: 8px 16px;\n"
+"    margin-right: 2px;\n"
+"}\n"
+"QTabBar::tab:selected {\n"
+"    background-color: #2C3E50;\n"
+"    color: white;\n"
+"}\n"
 "")
         self.tabWidget.setObjectName("tabWidget")
         self.tab_1 = QtWidgets.QWidget()
@@ -101,11 +122,34 @@ class Ui_Admin_Form(object):
         self.gridLayout = QtWidgets.QGridLayout(self.tab)
         self.gridLayout.setObjectName("gridLayout")
         self.tableWidget_3 = QtWidgets.QTableWidget(self.tab)
+        self.tableWidget_3.setStyleSheet("QTableWidget {\n"
+"    background-color: white;\n"
+"    border: 1px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    gridline-color: #ECF0F1;\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: #2C3E50;\n"
+"    color: white;\n"
+"    padding: 6px;\n"
+"    border: none;\n"
+"}")
         self.tableWidget_3.setObjectName("tableWidget_3")
         self.tableWidget_3.setColumnCount(0)
         self.tableWidget_3.setRowCount(0)
         self.gridLayout.addWidget(self.tableWidget_3, 0, 0, 1, 1)
         self.pushButton_5 = QtWidgets.QPushButton(self.tab)
+        self.pushButton_5.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_5.setObjectName("pushButton_5")
         self.gridLayout.addWidget(self.pushButton_5, 1, 0, 1, 1)
         self.tabWidget.addTab(self.tab, "")
@@ -113,18 +157,63 @@ class Ui_Admin_Form(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.pushButton_2 = QtWidgets.QPushButton(Form)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(10)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout_2.addWidget(self.pushButton_2)
         self.pushButton_4 = QtWidgets.QPushButton(Form)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(10)
+        self.pushButton_4.setFont(font)
+        self.pushButton_4.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_4.setObjectName("pushButton_4")
         self.horizontalLayout_2.addWidget(self.pushButton_4)
         self.pushButton_3 = QtWidgets.QPushButton(Form)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(10)
+        self.pushButton_3.setFont(font)
+        self.pushButton_3.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_3.setObjectName("pushButton_3")
         self.horizontalLayout_2.addWidget(self.pushButton_3)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(Form)
-        self.tabWidget.setCurrentIndex(5)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):

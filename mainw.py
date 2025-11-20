@@ -2,6 +2,7 @@ import os
 import sys
 import sqlite3
 import hashlib
+import re
 
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QTableWidgetItem, QMenu
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -35,6 +36,10 @@ def get_connection():
     c.execute("PRAGMA foreign_keys = ON;")  # подключает внешние ключи (чтобы  можно было делать связи между таблицами)
     c.row_factory = sqlite3.Row
     return connect
+
+def validate_name(text):
+    pattern = r'^[a-zA-Zа-яА-ЯёЁ\s\-]+$'
+    return bool(re.match(pattern, text)) and text.strip() != ""
 
 class MainWindow(QDialog, Ui_Auth_Form):
     def __init__(self):
@@ -74,7 +79,7 @@ class MainWindow(QDialog, Ui_Auth_Form):
             if result:
                 user_id, role = result
                 if role in ['employee']:
-                    self.open_admin_panel()
+                    self.open_admin_panel(user_id)
                 elif role in ['user']:
                     self.open_main_catalog(user_id)
                 else:
@@ -84,7 +89,7 @@ class MainWindow(QDialog, Ui_Auth_Form):
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось авторизоваться: {str(e)}")
 
-    def open_main_catalog(self, user_id = None):
+    def open_main_catalog(self, user_id):
         self.close()
         self.win = CatalogWin(user_id)
         self.win.show()
@@ -94,9 +99,9 @@ class MainWindow(QDialog, Ui_Auth_Form):
         self.win = RegisterWin()
         self.win.show()
 
-    def open_admin_panel(self):
+    def open_admin_panel(self, user_id):
         self.close()
-        self.win = AdminPanel()
+        self.win = AdminPanel(user_id)
         self.win.show()
 
 class RegisterWin(QDialog, Ui_Reg_Form):
@@ -134,6 +139,21 @@ class RegisterWin(QDialog, Ui_Reg_Form):
             phone = self.lineEdit_3.text().strip()
             email = self.lineEdit_9.text().strip()
             address = self.lineEdit_4.text().strip()
+
+            if not validate_name(last_name):
+                QMessageBox.warning(self, "Ошибка", "Фамилия должна содержать только буквы")
+                self.lineEdit.setFocus()
+                return
+
+            if not validate_name(name):
+                QMessageBox.warning(self, "Ошибка", "Имя должно содержать только буквы")
+                self.lineEdit_1.setFocus()
+                return
+
+            if third_name and not validate_name(third_name):  # Отчество может быть пустым
+                QMessageBox.warning(self, "Ошибка", "Отчество должно содержать только буквы")
+                self.lineEdit_2.setFocus()
+                return
 
             if not name or not last_name or not login or not password or not return_password or not phone or not email or not address:
                 QMessageBox.warning(self, "Внимание", "Заполните все поля.")
@@ -207,7 +227,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.scroll_layout = QtWidgets.QVBoxLayout(self.scroll_content)
         self.scroll_content.setLayout(self.scroll_layout)
 
-        menu_manager = MenuManager(user_id, 'user')
+        menu_manager = MenuManager(user_id)
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_2.clicked.connect(self.open_cart_window)
 
@@ -582,11 +602,8 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
             cart = c.fetchone()
 
             if not cart:
-                # Создаем корзину если ее нет
-                from datetime import datetime
-                current_date = datetime.now().strftime("%Y-%m-%d")
-                c.execute("INSERT INTO cart (user_id, created_date) VALUES (?, ?)",
-                          (self.user_id, current_date))
+                # Создаем корзину если ее нет (БЕЗ created_date)
+                c.execute("INSERT INTO cart (user_id) VALUES (?)", (self.user_id,))
                 cart_id = c.lastrowid
             else:
                 cart_id = cart[0]
@@ -613,7 +630,7 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
 
         except Exception as e:
             print(f"Ошибка добавления в корзину: {e}")
-            QMessageBox.warning(self, "Ошибка", "Не удалось добавить товар в корзину")
+            QMessageBox.warning(self, "Ошибка", f"Не удалось добавить товар в корзину\n {e}")
 
     def show_product_details(self, product_id):
         """Показ подробной информации о товаре"""
@@ -698,45 +715,39 @@ class CatalogWin(QDialog, Ui_Catalog_Form):
         self.win.show()
 
 class ProfileWin(QDialog, Ui_Profile_Form):
-    def __init__(self, user_id = None, user_type = 'user'):
+    def __init__(self, user_id):
         super().__init__()
         self.setupUi(self)
-
         self.lineEdit_6.setInputMask("+7 (000) 000-00-00")
-
         self.user_id = user_id
-        self.user_type = user_type
         self.load_user_data()
-
         self.pushButton.clicked.connect(self.save_changes)
 
     def load_user_data(self):
-        conn = get_connection()
-        c = conn.cursor()
-        # Получаем данные пользователя
-
-        if self.user_type == 'user':
+        try:
+            conn = get_connection()
+            c = conn.cursor()
+            # Получаем данные пользователя/сотрудника по его ID из таблицы user
             c.execute('''SELECT first_name, last_name, third_name, login, password, phone, email, 
-            address FROM user 
-                        WHERE id = ?''', (self.user_id,))
-        else:
-            c.execute('''SELECT first_name, last_name, third_name, login, password, phone, email, 
-            address FROM employee 
+                        address FROM user 
                         WHERE id = ?''', (self.user_id,))
 
-        user_data = c.fetchone()
-        conn.close()
+            user_data = c.fetchone()
+            conn.close()
 
-        if user_data:
-            # Заполняем поля данными из БД
-            self.lineEdit.setText(user_data[1] if user_data[1] else "")  # фамилия
-            self.lineEdit_2.setText(user_data[0] if user_data[0] else "") # имя
-            self.lineEdit_3.setText(user_data[2] if user_data[2] else "") # отчество
-            self.lineEdit_4.setText(user_data[3] if user_data[3] else "") # логин
-            self.lineEdit_5.setText("") # пароль хэширован и выводу не подлежит
-            self.lineEdit_6.setText(user_data[5] if user_data[5] else "") # телефон
-            self.lineEdit_7.setText(user_data[6] if user_data[6] else "") # почта
-            self.lineEdit_8.setText(user_data[7] if user_data[7] else "") # адрес
+            if user_data:
+                # Заполняем поля данными из БД
+                self.lineEdit.setText(user_data[1] if user_data[1] else "")  # фамилия
+                self.lineEdit_2.setText(user_data[0] if user_data[0] else "")  # имя
+                self.lineEdit_3.setText(user_data[2] if user_data[2] else "")  # отчество
+                self.lineEdit_4.setText(user_data[3] if user_data[3] else "")  # логин
+                self.lineEdit_5.setText("")  # пароль хэширован и выводу не подлежит
+                self.lineEdit_6.setText(user_data[5] if user_data[5] else "")  # телефон
+                self.lineEdit_7.setText(user_data[6] if user_data[6] else "")  # почта
+                self.lineEdit_8.setText(user_data[7] if user_data[7] else "")  # адрес
+
+        except Exception as e:
+            QMessageBox.warning(self, 'Ошибка', f'Ошибка загрузки данных {e}')
 
     def save_changes(self):
         conn = get_connection()
@@ -750,7 +761,7 @@ class ProfileWin(QDialog, Ui_Profile_Form):
             password = self.lineEdit_5.text()
             phone = self.lineEdit_6.text()
             email = self.lineEdit_7.text()
-            address = self.lineEdit_8.text()
+            address = self.lineEdit_8.text().capitalize()
 
             if not all([first_name, last_name, third_name, login, password, phone, email, address]):
                 QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
@@ -759,12 +770,12 @@ class ProfileWin(QDialog, Ui_Profile_Form):
             phone_digits = ''.join(filter(str.isdigit, phone))
             if len(phone_digits) != 11 or '_' in phone:
                 QMessageBox.warning(self, "Внимание", "Введите полный номер телефона.")
-                self.lineEdit_phone.setFocus()
+                self.lineEdit_6.setFocus()
                 return
 
             if '@' not in email or '.' not in email or email.index('@') > email.rindex('.') - 1:
                 QMessageBox.warning(self, 'Внимание', 'Используйте корректный адрес электронной почты!')
-                self.lineEdit_email.setFocus()
+                self.lineEdit_7.setFocus()
                 return
 
             # Хэшируем пароль только если он был изменен
@@ -772,33 +783,24 @@ class ProfileWin(QDialog, Ui_Profile_Form):
                 hashed_password = hash_password(password)
             else:
                 # Если пароль не меняли, оставляем старый
-                if self.user_type == 'user':
-                    c.execute('SELECT password FROM user WHERE id = ?', (self.user_id,))
-                else:
-                    c.execute('SELECT password FROM employee WHERE id = ?', (self.user_id,))
+                c.execute('SELECT password FROM user WHERE id = ?', (self.user_id,))
                 old_data = c.fetchone()
                 hashed_password = old_data[0] if old_data else ''
 
-            # Обновляем данные пользователя в БД
+            # Обновляем данные пользователя/сотрудника в БД
+            c.execute('''UPDATE user 
+                         SET first_name = ?, last_name = ?, third_name = ?, 
+                             login = ?, password = ?, phone = ?, email = ?,
+                             address = ? 
+                         WHERE id = ?''',
+                      (first_name, last_name, third_name, login, hashed_password, phone, email, address, self.user_id))
 
-            if self.user_type == 'user':
-                c.execute('''UPDATE user 
-                             SET first_name = ?, last_name = ?, third_name = ?, 
-                                 login = ?, password = ?, phone = ?, email = ?,
-                                 address = ? 
-                             WHERE id = ?''',
-          (first_name, last_name, third_name, login, hashed_password, phone, email, address, self.user_id))
-            else:
-                c.execute('''UPDATE employee 
-                             SET first_name = ?, last_name = ?, third_name = ?, 
-                                 login = ?, password = ?, phone = ?, email = ?,
-                                 address = ? 
-                             WHERE id = ?''',
-          (first_name, last_name, third_name, login, hashed_password, phone, email, address, self.user_id))
             conn.commit()
-            QMessageBox.information(self,'Успешно', 'Данные успешно сохранены')
+            QMessageBox.information(self, 'Успешно', 'Данные успешно сохранены')
         except Exception as e:
-            print(e)
+            QMessageBox.critical(self, 'Ошибка', f'Не удалось сохранить данные: {e}')
+        finally:
+            conn.close()
 
 class MenuManager:
     def __init__(self, user_id, user_type='user'):
@@ -825,7 +827,7 @@ class MenuManager:
         return profile_menu
 
     def open_profile_menu(self, parent_window):
-        parent_window.win = ProfileWin(self.user_id, self.user_type)
+        parent_window.win = ProfileWin(self.user_id)
         parent_window.win.show()
 
     def open_order_menu(self, parent_window):
@@ -847,7 +849,7 @@ class OrderWin(QDialog, Ui_Order_Form):
         self.setWindowState(QtCore.Qt.WindowMaximized)  # Развернуть на весь экран
         self.showMaximized()
 
-        menu_manager = MenuManager(user_id, 'user')
+        menu_manager = MenuManager(user_id)
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_6.clicked.connect(self.exit_to_catalog)
         self.pushButton_2.clicked.connect(self.open_cart)
@@ -930,6 +932,13 @@ class OrderWin(QDialog, Ui_Order_Form):
             # Статус
             status_item = QtWidgets.QTableWidgetItem(status)
             self.tableWidget.setItem(row, 3, status_item)
+
+            if status == 'Выполнен':
+                status_item.setBackground(QtGui.QColor(200, 255, 200))  # Зеленый
+            elif status == 'Отменен':
+                status_item.setBackground(QtGui.QColor(255, 200, 200))  # Красный
+            elif status == 'Доставляется':
+                status_item.setBackground(QtGui.QColor(255, 255, 200))  # Желтый
 
             # Стоимость
             sum_item = QtWidgets.QTableWidgetItem(f"{float(total_sum):.2f} руб.")
@@ -1062,7 +1071,7 @@ class ShoppingCart(QDialog, Ui_Cart_Form):
         self.user_id = user_id
         self.cart_items_data = {}  # Словарь для хранения данных о товарах {row: cart_item_id}
 
-        menu_manager = MenuManager(user_id, 'user')
+        menu_manager = MenuManager(user_id)
 
         self.pushButton.setMenu(menu_manager.create_profile_menu(self))
         self.pushButton_2.clicked.connect(self.open_cart_window)
@@ -1746,7 +1755,7 @@ class AdminPanel(QDialog, Ui_Admin_Form):
         self.pushButton.setMenu(self.profile_menu)
 
     def open_profile_menu(self):
-        self.win = ProfileWin(self.current_user_id, user_type="employee")
+        self.win = ProfileWin(self.current_user_id)
         self.win.show()
 
     def open_main_window_return(self):
@@ -1844,7 +1853,18 @@ class AdminPanel(QDialog, Ui_Admin_Form):
 
         for row_num, row_data in enumerate(data):
             for col_num, cell_data in enumerate(row_data):
-                table_widget.setItem(row_num, col_num, QTableWidgetItem(str(cell_data)))
+                item = QTableWidgetItem(str(cell_data))
+
+                if col_num == 3:
+                    status = str(cell_data).strip()
+                    if status == 'Выполнен':
+                        item.setBackground(QtGui.QColor(200, 255, 200))  # Зеленый
+                    elif status == 'Отменен':
+                        item.setBackground(QtGui.QColor(255, 200, 200))  # Красный
+                    elif status == 'Доставляется':
+                        item.setBackground(QtGui.QColor(255, 255, 200))  # Желтый
+
+                table_widget.setItem(row_num, col_num, item)
 
         table_widget.verticalHeader().setVisible(False)
         table_widget.resizeColumnsToContents()
@@ -1925,20 +1945,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             c = conn.cursor()
 
             # Получаем все заказы (можно добавить фильтр по статусу если нужно)
-            c.execute('''
-                SELECT 
-                    id,
-                    user_id,
-                    date,
-                    status,
-                    sum
+            c.execute('''SELECT id,user_id,date,status,sum
                 FROM user_order 
-                ORDER BY date DESC, id DESC
-            ''')
+                ORDER BY date DESC, id DESC ''')
             orders = c.fetchall()
-
             conn.close()
-
             self.display_orders_table(orders)
 
         except Exception as e:
@@ -2097,7 +2108,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
             c.execute('''
                 SELECT 
                     COUNT(*) as total_orders,
-                    SUM(sum) as total_revenue,
                     AVG(sum) as avg_order_value,
                     COUNT(CASE WHEN status = 'Выполнен' THEN 1 END) as completed_orders,
                     SUM(CASE WHEN status = 'Выполнен' THEN sum ELSE 0 END) as completed_revenue
@@ -2133,12 +2143,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
 
                 # Общая статистика
                 if overall_stats:
-                    total_orders, total_revenue, avg_order, completed_orders, completed_revenue = overall_stats
+                    total_orders, avg_order, completed_orders, completed_revenue = overall_stats
                     file.write("ОБЩАЯ СТАТИСТИКА ПО ЗАКАЗАМ:\n")
                     file.write("-" * 50 + "\n")
                     file.write(f"Всего заказов: {total_orders or 0}\n")
                     file.write(f"Выполненных заказов: {completed_orders or 0}\n")
-                    file.write(f"Общая сумма всех заказов: {float(total_revenue or 0):.2f} руб.\n")
                     file.write(f"Сумма выполненных заказов: {float(completed_revenue or 0):.2f} руб.\n")
                     file.write(f"Средний чек: {float(avg_order or 0):.2f} руб.\n")
                     file.write("\n")
@@ -2149,7 +2158,6 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                 file.write(f"{'ID':<6} {'Клиент':<20} {'Дата':<12} {'Статус':<12} {'Сумма':<10}\n")
                 file.write("-" * 90 + "\n")
 
-                total_all_revenue = 0
                 total_completed_revenue = 0
 
                 for order in orders:
@@ -2162,13 +2170,11 @@ class AdminPanel(QDialog, Ui_Admin_Form):
                     file.write(
                         f"{order_id:<6} {customer_display:<20} {date_display:<12} {status_display:<12} {float(total_sum):<10.2f}\n")
 
-                    total_all_revenue += float(total_sum)
                     if status == 'Выполнен':
                         total_completed_revenue += float(total_sum)
 
                 file.write("-" * 90 + "\n")
-                file.write(f"{'ИТОГО:':<6} {'':<20} {'':<12} {'Всего:':<12} {total_all_revenue:<10.2f}\n")
-                file.write(f"{'':<6} {'':<20} {'':<12} {'Выполнено:':<12} {total_completed_revenue:<10.2f}\n")
+                file.write(f"{'':<6} {'':<20} {'':<12} {'Всего:':<12} {total_completed_revenue:<10.2f}\n")
                 file.write("=" * 70 + "\n")
 
             QMessageBox.information(self, "Успех", f"Статистика заказов экспортирована в файл:\n{file_name}")
@@ -2232,6 +2238,9 @@ class AddProductDialog(QDialog, Ui_AddProductDialog):
             conn.close()
 
     def save_product(self):
+        conn = get_connection()
+        c = conn.cursor()
+
         # Получаем данные из полей
         name = self.lineEdit_name.text().strip().capitalize()
         description = self.textEdit_description.toPlainText().strip().capitalize()
@@ -2252,9 +2261,14 @@ class AddProductDialog(QDialog, Ui_AddProductDialog):
             return
 
         # Сохраняем товар в БД
-        conn = get_connection()
-        c = conn.cursor()
         try:
+            c.execute('''SELECT id FROM product WHERE name = ?''', (name,))
+            existing_product = c.fetchone()
+
+            if existing_product:
+                QMessageBox.warning(self, "Ошибка", "Товар с таким названием уже существует")
+                return
+
             c.execute('''INSERT INTO product 
                            (name, description, price, category_id, brand, image_path) 
                            VALUES (?, ?, ?, ?, ?, ?)''',
@@ -2302,7 +2316,7 @@ class AddOrderWithProductsDialog(QDialog, Ui_AddOrderWithProductsDialog):
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute("SELECT id, first_name, last_name FROM user")
+            c.execute("SELECT id, first_name, last_name FROM user WHERE role = 'user' ")
             users = c.fetchall()
             self.comboBox_user.clear()
             self.comboBox_user.addItem("")
@@ -2455,7 +2469,22 @@ class AddUserDialog(QDialog, Ui_AddUserDialog):
         password = self.lineEdit_password.text().strip()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
-        address = self.lineEdit_address.text().strip()
+        address = self.lineEdit_address.text().strip().capitalize()
+
+        if not validate_name(first_name):
+            QMessageBox.warning(self, "Ошибка", "Имя должно содержать только буквы")
+            self.lineEdit_first_name.setFocus()
+            return
+
+        if not validate_name(last_name):
+            QMessageBox.warning(self, "Ошибка", "Фамилия должна содержать только буквы")
+            self.lineEdit_last_name.setFocus()
+            return
+
+        if third_name and not validate_name(third_name):
+            QMessageBox.warning(self, "Ошибка", "Отчество должно содержать только буквы")
+            self.lineEdit_third_name.setFocus()
+            return
 
         if not all([first_name, last_name, login, password, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
@@ -2523,6 +2552,21 @@ class AddEmployeeDialog(QDialog, Ui_AddEmployeeDialog):
         email = self.lineEdit_email.text().strip()
         address = self.lineEdit_address.text().strip()
 
+        if not validate_name(first_name):
+            QMessageBox.warning(self, "Ошибка", "Имя должно содержать только буквы")
+            self.lineEdit_first_name.setFocus()
+            return
+
+        if not validate_name(last_name):
+            QMessageBox.warning(self, "Ошибка", "Фамилия должна содержать только буквы")
+            self.lineEdit_last_name.setFocus()
+            return
+
+        if third_name and not validate_name(third_name):
+            QMessageBox.warning(self, "Ошибка", "Отчество должно содержать только буквы")
+            self.lineEdit_third_name.setFocus()
+            return
+
         if not all([first_name, last_name, login, password, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
             return
@@ -2581,12 +2625,20 @@ class AddCategoryDialog(QDialog, Ui_AddCategoryDialog):
         description = self.textEdit_description.toPlainText().strip().capitalize()
 
         if not name:
-            QMessageBox.warning(self, "Ошибка", "Введите данные название категории")
+            QMessageBox.warning(self, "Ошибка", "Введите название категории")
             return
 
         conn = get_connection()
         c = conn.cursor()
         try:
+            # Проверяем, существует ли категория с таким названием
+            c.execute('''SELECT id FROM category WHERE name = ?''', (name,))
+            existing_category = c.fetchone()
+
+            if existing_category:
+                QMessageBox.warning(self, "Ошибка", "Категория с таким названием уже существует")
+                return
+
             c.execute('''INSERT INTO category (name, description) 
                         VALUES (?, ?)''', (name, description))
             conn.commit()
@@ -2793,7 +2845,22 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         third_name = self.lineEdit_third_name.text().strip().capitalize()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
-        address = self.lineEdit_address.text().strip()
+        address = self.lineEdit_address.text().strip().capitalize()
+
+        if not validate_name(first_name):
+            QMessageBox.warning(self, "Ошибка", "Имя должно содержать только буквы")
+            self.lineEdit_first_name.setFocus()
+            return
+
+        if not validate_name(last_name):
+            QMessageBox.warning(self, "Ошибка", "Фамилия должна содержать только буквы")
+            self.lineEdit_last_name.setFocus()
+            return
+
+        if third_name and not validate_name(third_name):
+            QMessageBox.warning(self, "Ошибка", "Отчество должно содержать только буквы")
+            self.lineEdit_third_name.setFocus()
+            return
 
         if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
@@ -2815,7 +2882,7 @@ class EditUserDialog(QDialog, Ui_EditUserDialog):
         try:
             c.execute('''UPDATE user SET first_name=?, last_name=?, third_name=?, 
                         phone=?, email=?, address=?
-                        WHERE role = 'user' ''',
+                        WHERE id = ? ''',
                       (first_name, last_name, third_name, phone, email, address, self.user_id))
             conn.commit()
             QMessageBox.information(self, "Успех", "Пользователь успешно обновлен")
@@ -2866,7 +2933,22 @@ class EditEmployeeDialog(QDialog, Ui_EditEmployeeDialog):
         third_name = self.lineEdit_third_name.text().strip().capitalize()
         phone = self.lineEdit_phone.text().strip()
         email = self.lineEdit_email.text().strip()
-        address = self.lineEdit_address.text().strip()
+        address = self.lineEdit_address.text().strip().capitalize()
+
+        if not validate_name(first_name):
+            QMessageBox.warning(self, "Ошибка", "Имя должно содержать только буквы")
+            self.lineEdit_first_name.setFocus()
+            return
+
+        if not validate_name(last_name):
+            QMessageBox.warning(self, "Ошибка", "Фамилия должна содержать только буквы")
+            self.lineEdit_last_name.setFocus()
+            return
+
+        if third_name and not validate_name(third_name):
+            QMessageBox.warning(self, "Ошибка", "Отчество должно содержать только буквы")
+            self.lineEdit_third_name.setFocus()
+            return
 
         if not all([first_name, last_name, phone, email, address]):
             QMessageBox.warning(self, "Ошибка", "Заполните все обязательные поля")
@@ -2927,6 +3009,7 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
         conn = get_connection()
         c = conn.cursor()
         try:
+            # Загрузка основных данных заказа
             c.execute('''SELECT user_id, date, status, sum 
                          FROM user_order WHERE id = ?''', (self.order_id,))
             order_data = c.fetchone()
@@ -2936,12 +3019,16 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
 
                 self.label_order_id_value.setText(str(self.order_id))
 
-                c.execute('''SELECT first_name, last_name FROM user WHERE id = ?''', (user_id,))
+                # Загрузка информации о пользователе (включая адрес)
+                c.execute('''SELECT first_name, last_name, address FROM user WHERE id = ?''', (user_id,))
                 user_data = c.fetchone()
                 if user_data:
                     user_name = f"{user_data[0]} {user_data[1]}"
                     self.label_user_value.setText(user_name)
+                    # ↓ НОВАЯ СТРОКА - отображение адреса
+                    self.label_address_value.setText(user_data[2] or "Адрес не указан")
 
+                # Установка статуса заказа
                 index = self.comboBox_status.findText(status)
                 if index >= 0:
                     self.comboBox_status.setCurrentIndex(index)
@@ -2949,6 +3036,7 @@ class EditOrderWithProductsDialog(QDialog, Ui_EditOrderWithProductsDialog):
                 self.label_date_value.setText(date)
                 self.label_total_value.setText(f"{total_sum:.2f} руб.")
 
+            # Загрузка товаров в заказе (остается без изменений)
             c.execute('''SELECT p.name, op.price_at_time, op.quantity
                          FROM order_position op
                          JOIN product p ON op.product_id = p.id
@@ -3049,6 +3137,16 @@ class EditCategoryDialog(QDialog, Ui_EditCategoryDialog):
         conn = get_connection()
         c = conn.cursor()
         try:
+            # Проверяем, существует ли категория с таким названием (кроме текущей)
+            c.execute('''SELECT id FROM category WHERE name = ? AND id != ?''',
+                      (name, self.category_id))
+            existing_category = c.fetchone()
+
+            if existing_category:
+                QMessageBox.warning(self, "Ошибка", "Категория с таким названием уже существует")
+                return
+
+            # Обновляем категорию
             c.execute('''UPDATE category SET name=?, description=? WHERE id=?''',
                       (name, description, self.category_id))
 
@@ -3056,6 +3154,8 @@ class EditCategoryDialog(QDialog, Ui_EditCategoryDialog):
             QMessageBox.information(self, "Успех", "Категория успешно обновлена")
             self.accept()
 
+        except sqlite3.IntegrityError:
+            QMessageBox.critical(self, "Ошибка", "Категория с таким названием уже существует")
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось обновить категорию: {str(e)}")
         finally:

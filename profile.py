@@ -14,14 +14,18 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Profile_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(549, 399)
+        Form.resize(554, 399)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.label = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
+        self.label.setStyleSheet("color: #2C3E50; ")
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.verticalLayout_5.addWidget(self.label)
@@ -34,6 +38,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_2.setFont(font)
+        self.label_2.setStyleSheet("color: #2C3E50;")
         self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
         self.label_3 = QtWidgets.QLabel(Form)
@@ -41,6 +46,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_3.setFont(font)
+        self.label_3.setStyleSheet("color: #2C3E50;")
         self.label_3.setObjectName("label_3")
         self.verticalLayout.addWidget(self.label_3)
         self.label_4 = QtWidgets.QLabel(Form)
@@ -48,6 +54,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_4.setFont(font)
+        self.label_4.setStyleSheet("color: #2C3E50;")
         self.label_4.setObjectName("label_4")
         self.verticalLayout.addWidget(self.label_4)
         self.label_5 = QtWidgets.QLabel(Form)
@@ -55,6 +62,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_5.setFont(font)
+        self.label_5.setStyleSheet("color: #2C3E50;")
         self.label_5.setObjectName("label_5")
         self.verticalLayout.addWidget(self.label_5)
         self.label_6 = QtWidgets.QLabel(Form)
@@ -62,6 +70,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_6.setFont(font)
+        self.label_6.setStyleSheet("color: #2C3E50;")
         self.label_6.setObjectName("label_6")
         self.verticalLayout.addWidget(self.label_6)
         self.label_12 = QtWidgets.QLabel(Form)
@@ -69,6 +78,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_12.setFont(font)
+        self.label_12.setStyleSheet("color: #2C3E50;")
         self.label_12.setObjectName("label_12")
         self.verticalLayout.addWidget(self.label_12)
         self.label_13 = QtWidgets.QLabel(Form)
@@ -76,6 +86,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_13.setFont(font)
+        self.label_13.setStyleSheet("color: #2C3E50;")
         self.label_13.setObjectName("label_13")
         self.verticalLayout.addWidget(self.label_13)
         self.label_14 = QtWidgets.QLabel(Form)
@@ -83,6 +94,7 @@ class Ui_Profile_Form(object):
         font.setFamily("Segoe Print")
         font.setPointSize(12)
         self.label_14.setFont(font)
+        self.label_14.setStyleSheet("color: #2C3E50;")
         self.label_14.setObjectName("label_14")
         self.verticalLayout.addWidget(self.label_14)
         self.horizontalLayout.addLayout(self.verticalLayout)
@@ -90,35 +102,130 @@ class Ui_Profile_Form(object):
         self.verticalLayout_3.setContentsMargins(30, -1, 30, -1)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.lineEdit = QtWidgets.QLineEdit(Form)
+        self.lineEdit.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit.setObjectName("lineEdit")
         self.verticalLayout_3.addWidget(self.lineEdit)
         self.lineEdit_2 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_2.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.verticalLayout_3.addWidget(self.lineEdit_2)
         self.lineEdit_3 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_3.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_3.setObjectName("lineEdit_3")
         self.verticalLayout_3.addWidget(self.lineEdit_3)
         self.lineEdit_4 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_4.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_4.setObjectName("lineEdit_4")
         self.verticalLayout_3.addWidget(self.lineEdit_4)
         self.lineEdit_5 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_5.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_5.setObjectName("lineEdit_5")
         self.verticalLayout_3.addWidget(self.lineEdit_5)
         self.lineEdit_6 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_6.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_6.setObjectName("lineEdit_6")
         self.verticalLayout_3.addWidget(self.lineEdit_6)
         self.lineEdit_7 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_7.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_7.setObjectName("lineEdit_7")
         self.verticalLayout_3.addWidget(self.lineEdit_7)
         self.lineEdit_8 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_8.setStyleSheet("QLineEdit {\n"
+"    background-color: white;\n"
+"    border: 2px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    padding: 2px;\n"
+"    color: #2C3E50;\n"
+"}\n"
+"QLineEdit:focus {\n"
+"    border-color: #3498DB;\n"
+"}")
         self.lineEdit_8.setObjectName("lineEdit_8")
         self.verticalLayout_3.addWidget(self.lineEdit_8)
         self.horizontalLayout.addLayout(self.verticalLayout_3)
         self.verticalLayout_5.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_2.setContentsMargins(200, -1, 200, -1)
+        self.horizontalLayout_2.setContentsMargins(180, -1, 180, -1)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.pushButton = QtWidgets.QPushButton(Form)
+        font = QtGui.QFont()
+        font.setFamily("Segoe Print")
+        font.setPointSize(10)
+        self.pushButton.setFont(font)
+        self.pushButton.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout_2.addWidget(self.pushButton)
         self.verticalLayout_5.addLayout(self.horizontalLayout_2)

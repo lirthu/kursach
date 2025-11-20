@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS cart_item (
 password = hashlib.sha256('1234'.encode()).hexdigest()
 c.execute('''INSERT OR IGNORE INTO user (first_name, last_name, third_name, login, password, phone, email, address, role)
              VALUES ('Артём','Баймухомедов','Владиславович','admin',?,'+7 (926) 286-72-45','lirthu777@gmail.com','Moscow','employee')''', (password,))
-c.execute('''select * from user''')
+c.execute('''SELECT * FROM user''')
 res = c.fetchall()
 for i in res:
     print(dict(i))

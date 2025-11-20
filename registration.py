@@ -14,15 +14,19 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Reg_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(520, 450)
+        Form.resize(521, 469)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label.setFont(font)
         self.label.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label.setStyleSheet("color: #2C3E50; ")
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.verticalLayout.addWidget(self.label)
@@ -30,12 +34,144 @@ class Ui_Reg_Form(object):
         self.gridLayout.setContentsMargins(-1, -1, 15, -1)
         self.gridLayout.setHorizontalSpacing(30)
         self.gridLayout.setObjectName("gridLayout")
+
+        # Сначала все lineEdit в указанном порядке
+        self.lineEdit = QtWidgets.QLineEdit(Form)
+        self.lineEdit.setStyleSheet("QLineEdit {\n"
+                                    "    background-color: white;\n"
+                                    "    border: 2px solid #BDC3C7;\n"
+                                    "    border-radius: 4px;\n"
+                                    "    padding: 2px;\n"
+                                    "    color: #2C3E50;\n"
+                                    "}\n"
+                                    "QLineEdit:focus {\n"
+                                    "    border-color: #3498DB;\n"
+                                    "}")
+        self.lineEdit.setObjectName("lineEdit")
+        self.gridLayout.addWidget(self.lineEdit, 1, 2, 1, 1)
+
+        self.lineEdit_1 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_1.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
+        self.lineEdit_1.setObjectName("lineEdit_1")
+        self.gridLayout.addWidget(self.lineEdit_1, 2, 2, 1, 1)
+
+        self.lineEdit_2 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_2.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.gridLayout.addWidget(self.lineEdit_2, 3, 2, 1, 1)
+
+        self.lineEdit_3 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_3.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.gridLayout.addWidget(self.lineEdit_3, 4, 2, 1, 1)
+
+        self.lineEdit_4 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_4.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
+        self.lineEdit_4.setObjectName("lineEdit_4")
+        self.gridLayout.addWidget(self.lineEdit_4, 5, 2, 1, 1)
+
+        self.lineEdit_9 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_9.setStyleSheet("QLineEdit {\n"
+                                      "    background-color: white;\n"
+                                      "    border: 2px solid #BDC3C7;\n"
+                                      "    border-radius: 4px;\n"
+                                      "    padding: 2px;\n"
+                                      "    color: #2C3E50;\n"
+                                      "}\n"
+                                      "QLineEdit:focus {\n"
+                                      "    border-color: #3498DB;\n"
+                                      "}")
+        self.lineEdit_9.setObjectName("lineEdit_9")
+        self.gridLayout.addWidget(self.lineEdit_9, 6, 2, 1, 1)
+
+        self.lineEdit_10 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_10.setStyleSheet("QLineEdit {\n"
+                                       "    background-color: white;\n"
+                                       "    border: 2px solid #BDC3C7;\n"
+                                       "    border-radius: 4px;\n"
+                                       "    padding: 2px;\n"
+                                       "    color: #2C3E50;\n"
+                                       "}\n"
+                                       "QLineEdit:focus {\n"
+                                       "    border-color: #3498DB;\n"
+                                       "}")
+        self.lineEdit_10.setObjectName("lineEdit_10")
+        self.gridLayout.addWidget(self.lineEdit_10, 7, 2, 1, 1)
+
+        self.lineEdit_11 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_11.setStyleSheet("QLineEdit {\n"
+                                       "    background-color: white;\n"
+                                       "    border: 2px solid #BDC3C7;\n"
+                                       "    border-radius: 4px;\n"
+                                       "    padding: 2px;\n"
+                                       "    color: #2C3E50;\n"
+                                       "}\n"
+                                       "QLineEdit:focus {\n"
+                                       "    border-color: #3498DB;\n"
+                                       "}")
+        self.lineEdit_11.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_11.setObjectName("lineEdit_11")
+        self.gridLayout.addWidget(self.lineEdit_11, 8, 2, 1, 1)
+
+        self.lineEdit_12 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_12.setStyleSheet("QLineEdit {\n"
+                                       "    background-color: white;\n"
+                                       "    border: 2px solid #BDC3C7;\n"
+                                       "    border-radius: 4px;\n"
+                                       "    padding: 2px;\n"
+                                       "    color: #2C3E50;\n"
+                                       "}\n"
+                                       "QLineEdit:focus {\n"
+                                       "    border-color: #3498DB;\n"
+                                       "}")
+        self.lineEdit_12.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineEdit_12.setObjectName("lineEdit_12")
+        self.gridLayout.addWidget(self.lineEdit_12, 9, 2, 1, 1)
+
+        # Затем все остальные элементы
         self.label_14 = QtWidgets.QLabel(Form)
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(11)
         self.label_14.setFont(font)
         self.label_14.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_14.setStyleSheet("color: #2C3E50;")
         self.label_14.setObjectName("label_14")
         self.gridLayout.addWidget(self.label_14, 9, 0, 1, 1)
         self.label_10 = QtWidgets.QLabel(Form)
@@ -44,6 +180,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_10.setFont(font)
         self.label_10.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_10.setStyleSheet("color: #2C3E50;")
         self.label_10.setObjectName("label_10")
         self.gridLayout.addWidget(self.label_10, 4, 0, 1, 1)
         self.label_13 = QtWidgets.QLabel(Form)
@@ -52,6 +189,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_13.setFont(font)
         self.label_13.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_13.setStyleSheet("color: #2C3E50;")
         self.label_13.setObjectName("label_13")
         self.gridLayout.addWidget(self.label_13, 6, 0, 1, 1)
         self.label_5 = QtWidgets.QLabel(Form)
@@ -60,6 +198,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_5.setFont(font)
         self.label_5.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_5.setStyleSheet("color: #2C3E50;")
         self.label_5.setObjectName("label_5")
         self.gridLayout.addWidget(self.label_5, 2, 0, 1, 1)
         self.label_2 = QtWidgets.QLabel(Form)
@@ -68,6 +207,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_2.setFont(font)
         self.label_2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_2.setStyleSheet("color: #2C3E50;")
         self.label_2.setObjectName("label_2")
         self.gridLayout.addWidget(self.label_2, 5, 0, 1, 1)
         self.label_12 = QtWidgets.QLabel(Form)
@@ -76,6 +216,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_12.setFont(font)
         self.label_12.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_12.setStyleSheet("color: #2C3E50;")
         self.label_12.setObjectName("label_12")
         self.gridLayout.addWidget(self.label_12, 7, 0, 1, 1)
         self.label_4 = QtWidgets.QLabel(Form)
@@ -84,6 +225,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_4.setFont(font)
         self.label_4.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_4.setStyleSheet("color: #2C3E50;")
         self.label_4.setObjectName("label_4")
         self.gridLayout.addWidget(self.label_4, 8, 0, 1, 1)
         self.label_3 = QtWidgets.QLabel(Form)
@@ -92,6 +234,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_3.setFont(font)
         self.label_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_3.setStyleSheet("color: #2C3E50;")
         self.label_3.setObjectName("label_3")
         self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
         self.label_11 = QtWidgets.QLabel(Form)
@@ -100,6 +243,7 @@ class Ui_Reg_Form(object):
         font.setPointSize(11)
         self.label_11.setFont(font)
         self.label_11.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_11.setStyleSheet("color: #2C3E50;")
         self.label_11.setObjectName("label_11")
         self.gridLayout.addWidget(self.label_11, 1, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -107,48 +251,18 @@ class Ui_Reg_Form(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.checkBox = QtWidgets.QCheckBox(Form)
+        self.checkBox.setStyleSheet("QCheckBox {\n"
+                                    "    color: #2C3E50;\n"
+                                    "    spacing: 5px;\n"
+                                    "}\n"
+                                    "QCheckBox::indicator {\n"
+                                    "    width: 16px;\n"
+                                    "    height: 16px;\n"
+                                    "}\n"
+                                    "")
         self.checkBox.setObjectName("checkBox")
         self.horizontalLayout.addWidget(self.checkBox)
         self.gridLayout.addLayout(self.horizontalLayout, 10, 2, 1, 1)
-
-        self.lineEdit = QtWidgets.QLineEdit(Form)
-        self.lineEdit.setObjectName("lineEdit")
-        self.gridLayout.addWidget(self.lineEdit, 1, 2, 1, 1)
-
-        self.lineEdit_1 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_1.setObjectName("lineEdit_1")
-        self.gridLayout.addWidget(self.lineEdit_1, 2, 2, 1, 1)
-
-        self.lineEdit_2 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.gridLayout.addWidget(self.lineEdit_2, 3, 2, 1, 1)
-
-        self.lineEdit_3 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_3.setObjectName("lineEdit_3")
-        self.gridLayout.addWidget(self.lineEdit_3, 4, 2, 1, 1)
-
-        self.lineEdit_4 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_4.setObjectName("lineEdit_4")
-        self.gridLayout.addWidget(self.lineEdit_4, 5, 2, 1, 1)
-
-        self.lineEdit_9 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_9.setObjectName("lineEdit_9")
-        self.gridLayout.addWidget(self.lineEdit_9, 6, 2, 1, 1)
-
-        self.lineEdit_10 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_10.setObjectName("lineEdit_10")
-        self.gridLayout.addWidget(self.lineEdit_10, 7, 2, 1, 1)
-
-        self.lineEdit_11 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_11.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.lineEdit_11.setObjectName("lineEdit_11")
-        self.gridLayout.addWidget(self.lineEdit_11, 8, 2, 1, 1)
-
-        self.lineEdit_12 = QtWidgets.QLineEdit(Form)
-        self.lineEdit_12.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.lineEdit_12.setObjectName("lineEdit_12")
-        self.gridLayout.addWidget(self.lineEdit_12, 9, 2, 1, 1)
-
         self.verticalLayout.addLayout(self.gridLayout)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setContentsMargins(155, -1, 133, -1)
@@ -159,7 +273,17 @@ class Ui_Reg_Form(object):
         font.setPointSize(10)
         font.setUnderline(True)
         self.pushButton.setFont(font)
-        self.pushButton.setStyleSheet("background-color: transparent")
+        self.pushButton.setStyleSheet("QPushButton {\n"
+                                      "    background-color: transparent;\n"
+                                      "    color: #3498DB;\n"
+                                      "    border: 1px solid #3498DB;\n"
+                                      "    padding: 8px 16px;\n"
+                                      "    border-radius: 5px;\n"
+                                      "}\n"
+                                      "QPushButton:hover {\n"
+                                      "    background-color: #3498DB;\n"
+                                      "    color: white;\n"
+                                      "}")
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_4.addWidget(self.pushButton)
         self.pushButton_2 = QtWidgets.QPushButton(Form)
@@ -168,7 +292,17 @@ class Ui_Reg_Form(object):
         font.setPointSize(10)
         font.setUnderline(True)
         self.pushButton_2.setFont(font)
-        self.pushButton_2.setStyleSheet("background-color: transparent")
+        self.pushButton_2.setStyleSheet("QPushButton {\n"
+                                        "    background-color: transparent;\n"
+                                        "    color: #3498DB;\n"
+                                        "    border: 1px solid #3498DB;\n"
+                                        "    padding: 8px 16px;\n"
+                                        "    border-radius: 5px;\n"
+                                        "}\n"
+                                        "QPushButton:hover {\n"
+                                        "    background-color: #3498DB;\n"
+                                        "    color: white;\n"
+                                        "}")
         self.pushButton_2.setObjectName("pushButton_2")
         self.verticalLayout_4.addWidget(self.pushButton_2)
         self.verticalLayout.addLayout(self.verticalLayout_4)

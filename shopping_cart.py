@@ -15,6 +15,7 @@ class Ui_Cart_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1080, 720)
+        Form.setStyleSheet("background-color: #ECF0F1;")
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -24,8 +25,12 @@ class Ui_Cart_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_5.setFont(font)
         self.label_5.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_5.setStyleSheet("color: #2C3E50; \n"
+"")
         self.label_5.setObjectName("label_5")
         self.horizontalLayout.addWidget(self.label_5)
         self.label = QtWidgets.QLabel(Form)
@@ -48,7 +53,7 @@ class Ui_Cart_Form(object):
         self.pushButton_3.setStyleSheet("background-color: transparent")
         self.pushButton_3.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("поиск.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("png/поиск.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_3.setIcon(icon)
         self.pushButton_3.setIconSize(QtCore.QSize(24, 24))
         self.pushButton_3.setObjectName("pushButton_3")
@@ -63,7 +68,7 @@ class Ui_Cart_Form(object):
         self.pushButton_2.setStyleSheet("background-color: transparent")
         self.pushButton_2.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("png/корзина.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon1)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
@@ -77,7 +82,7 @@ class Ui_Cart_Form(object):
         self.pushButton.setStyleSheet("background-color: transparent")
         self.pushButton.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("png/профиль.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton.setIcon(icon2)
         self.pushButton.setIconSize(QtCore.QSize(36, 36))
         self.pushButton.setObjectName("pushButton")
@@ -87,6 +92,18 @@ class Ui_Cart_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         self.tableWidget.setFont(font)
+        self.tableWidget.setStyleSheet("QTableWidget {\n"
+"    background-color: white;\n"
+"    border: 1px solid #BDC3C7;\n"
+"    border-radius: 4px;\n"
+"    gridline-color: #ECF0F1;\n"
+"}\n"
+"QHeaderView::section {\n"
+"    background-color: #2C3E50;\n"
+"    color: white;\n"
+"    padding: 6px;\n"
+"    border: none;\n"
+"}")
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(0)
@@ -111,8 +128,11 @@ class Ui_Cart_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_2.setFont(font)
         self.label_2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_2.setStyleSheet("color: #2C3E50; ")
         self.label_2.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout_2.addWidget(self.label_2)
@@ -130,8 +150,11 @@ class Ui_Cart_Form(object):
         font = QtGui.QFont()
         font.setFamily("Segoe Print")
         font.setPointSize(16)
+        font.setBold(True)
+        font.setWeight(75)
         self.label_4.setFont(font)
         self.label_4.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.label_4.setStyleSheet("color: #2C3E50; ")
         self.label_4.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_2.addWidget(self.label_4)
@@ -147,7 +170,17 @@ class Ui_Cart_Form(object):
         font.setUnderline(False)
         self.pushButton_5.setFont(font)
         self.pushButton_5.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.pushButton_5.setStyleSheet("background-color: transparent")
+        self.pushButton_5.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_5.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_5.setObjectName("pushButton_5")
         self.horizontalLayout_3.addWidget(self.pushButton_5)
@@ -160,7 +193,17 @@ class Ui_Cart_Form(object):
         font.setUnderline(False)
         self.pushButton_6.setFont(font)
         self.pushButton_6.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.pushButton_6.setStyleSheet("background-color: transparent")
+        self.pushButton_6.setStyleSheet("QPushButton {\n"
+"    background-color: transparent;\n"
+"    color: #3498DB;\n"
+"    border: 1px solid #3498DB;\n"
+"    padding: 8px 16px;\n"
+"    border-radius: 5px;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: #3498DB;\n"
+"    color: white;\n"
+"}")
         self.pushButton_6.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_6.setObjectName("pushButton_6")
         self.horizontalLayout_3.addWidget(self.pushButton_6)

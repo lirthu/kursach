@@ -7,11 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>1107</width>
-    <height>817</height>
+    <height>584</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Каталог</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #ECF0F1;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -22,7 +25,20 @@
         <number>30</number>
        </property>
        <item>
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="lineEdit">
+         <property name="styleSheet">
+          <string notr="true">QLineEdit {
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 6px;
+    color: #2C3E50;
+}
+QLineEdit:focus {
+    border-color: #3498DB;
+}</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_3">
@@ -41,7 +57,7 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>поиск.png</normaloff>поиск.png</iconset>
+           <normaloff>png/поиск.png</normaloff>png/поиск.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -71,7 +87,7 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>корзина.png</normaloff>корзина.png</iconset>
+           <normaloff>png/корзина.png</normaloff>png/корзина.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -98,7 +114,7 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>профиль.png</normaloff>профиль.png</iconset>
+           <normaloff>png/профиль.png</normaloff>png/профиль.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -112,6 +128,13 @@
      </item>
      <item row="1" column="1">
       <widget class="QScrollArea" name="scrollArea">
+       <property name="styleSheet">
+        <string notr="true">QScrollArea {
+    background-color: white;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+}</string>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -120,8 +143,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>884</width>
-          <height>731</height>
+          <width>858</width>
+          <height>498</height>
          </rect>
         </property>
        </widget>
@@ -133,10 +156,16 @@
         <font>
          <family>Segoe Print</family>
          <pointsize>16</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="cursor">
         <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #2C3E50; 
+</string>
        </property>
        <property name="text">
         <string>Каталог</string>
@@ -158,12 +187,18 @@
          </property>
          <property name="styleSheet">
           <string notr="true">QComboBox {
-    background-color: transparent;
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 6px;
+    color: #2C3E50;
 }
-
+QComboBox::drop-down {
+    border: none;
+}
 QComboBox QAbstractItemView {
     background-color: white;
-    border: 1px solid gray;
+    border: 1px solid #BDC3C7;
 }</string>
          </property>
          <item>
@@ -193,12 +228,18 @@ QComboBox QAbstractItemView {
          </property>
          <property name="styleSheet">
           <string notr="true">QComboBox {
-    background-color: transparent;
+    background-color: white;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    padding: 6px;
+    color: #2C3E50;
 }
-
+QComboBox::drop-down {
+    border: none;
+}
 QComboBox QAbstractItemView {
     background-color: white;
-    border: 1px solid gray;
+    border: 1px solid #BDC3C7;
 }</string>
          </property>
          <property name="editable">
@@ -225,6 +266,9 @@ QComboBox QAbstractItemView {
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: #2C3E50;</string>
+         </property>
          <property name="text">
           <string>Цена</string>
          </property>
@@ -243,6 +287,9 @@ QComboBox QAbstractItemView {
          </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #2C3E50;</string>
          </property>
          <property name="text">
           <string>От</string>
@@ -266,6 +313,9 @@ QComboBox QAbstractItemView {
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: #2C3E50;</string>
+         </property>
          <property name="text">
           <string>До</string>
          </property>
@@ -286,7 +336,17 @@ QComboBox QAbstractItemView {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: transparent;</string>
+          <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 2px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
          </property>
          <property name="text">
           <string>Применить фильтры</string>
@@ -302,7 +362,17 @@ QComboBox QAbstractItemView {
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-color: transparent;</string>
+          <string notr="true">QPushButton {
+    background-color: transparent;
+    color: #3498DB;
+    border: 1px solid #3498DB;
+    padding: 2px 16px;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #3498DB;
+    color: white;
+}</string>
          </property>
          <property name="text">
           <string>Сбросить фильтры</string>
